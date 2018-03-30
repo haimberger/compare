@@ -3,7 +3,7 @@ package basic
 import "testing"
 
 // TestExactBool tests if an equaler compares two Boolean values exactly.
-func TestExactBool(t *testing.T, be BasicEqualer) {
+func TestExactBool(t *testing.T, e Equaler) {
 	type testCase struct {
 		a        bool
 		b        bool
@@ -17,14 +17,14 @@ func TestExactBool(t *testing.T, be BasicEqualer) {
 	}
 
 	for _, tc := range tcs {
-		if actual := be.Bool(tc.a, tc.b); actual != tc.expected {
+		if actual := e.Bool(tc.a, tc.b); actual != tc.expected {
 			t.Errorf("[%v == %v] expected %v; got %v", tc.a, tc.b, tc.expected, actual)
 		}
 	}
 }
 
 // TestExactInt tests if an equaler compares two integer values exactly.
-func TestExactInt(t *testing.T, be BasicEqualer) {
+func TestExactInt(t *testing.T, e Equaler) {
 	type testCase struct {
 		a        int
 		b        int
@@ -47,14 +47,14 @@ func TestExactInt(t *testing.T, be BasicEqualer) {
 	}
 
 	for _, tc := range tcs {
-		if actual := be.Int(tc.a, tc.b); actual != tc.expected {
+		if actual := e.Int(tc.a, tc.b); actual != tc.expected {
 			t.Errorf("[%v == %v] expected %v; got %v", tc.a, tc.b, tc.expected, actual)
 		}
 	}
 }
 
 // TestExactFloat64 tests if an equaler compares two floating-point values exactly.
-func TestExactFloat64(t *testing.T, be BasicEqualer) {
+func TestExactFloat64(t *testing.T, e Equaler) {
 	type testCase struct {
 		a        float64
 		b        float64
@@ -77,14 +77,14 @@ func TestExactFloat64(t *testing.T, be BasicEqualer) {
 	}
 
 	for _, tc := range tcs {
-		if actual := be.Float64(tc.a, tc.b); actual != tc.expected {
+		if actual := e.Float64(tc.a, tc.b); actual != tc.expected {
 			t.Errorf("[%v == %v] expected %v; got %v", tc.a, tc.b, tc.expected, actual)
 		}
 	}
 }
 
 // TestExactString tests if an equaler compares two strings exactly.
-func TestExactString(t *testing.T, be BasicEqualer) {
+func TestExactString(t *testing.T, e Equaler) {
 	type testCase struct {
 		a        string
 		b        string
@@ -100,7 +100,7 @@ func TestExactString(t *testing.T, be BasicEqualer) {
 	}
 
 	for _, tc := range tcs {
-		if actual := be.String(tc.a, tc.b); actual != tc.expected {
+		if actual := e.String(tc.a, tc.b); actual != tc.expected {
 			t.Errorf("[%v == %v] expected %v; got %v", tc.a, tc.b, tc.expected, actual)
 		}
 	}
