@@ -14,9 +14,9 @@ func (tc TolerantEqualer) Bool(a, b bool) bool {
 	return a == b
 }
 
-// Int compares two integer values within a tolerance. For example, if the
+// Int64 compares two integer values within a tolerance. For example, if the
 // tolerance is 3.7, then 8 and 11 are considered equal, but 8 and 12 are not.
-func (tc TolerantEqualer) Int(a, b int) bool {
+func (tc TolerantEqualer) Int64(a, b int64) bool {
 	return math.Abs(float64(a-b)) <= tc.Tolerance
 }
 

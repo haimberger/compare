@@ -12,7 +12,7 @@ func TestBool_Time(t *testing.T) {
 
 func TestInt_Time(t *testing.T) {
 	// integer values should be compared exactly, regardless of the tolerance
-	TestExactInt(t, TimeEqualer{})
+	TestExactInt64(t, TimeEqualer{})
 }
 
 func TestFloat64_Time(t *testing.T) {

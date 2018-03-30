@@ -16,8 +16,8 @@ func (tc TimeEqualer) Bool(a, b bool) bool {
 	return a == b
 }
 
-// Int compares two integer values exactly.
-func (tc TimeEqualer) Int(a, b int) bool {
+// Int64 compares two integer values exactly.
+func (tc TimeEqualer) Int64(a, b int64) bool {
 	return a == b
 }
 

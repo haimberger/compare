@@ -9,7 +9,7 @@ func TestBool_Exact(t *testing.T) {
 }
 
 func TestInt_Exact(t *testing.T) {
-	TestExactInt(t, ExactEqualer{})
+	TestExactInt64(t, ExactEqualer{})
 }
 
 func TestFloat64_Exact(t *testing.T) {

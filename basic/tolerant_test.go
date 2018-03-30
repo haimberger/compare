@@ -9,16 +9,16 @@ func TestBool_Tolerant(t *testing.T) {
 
 func TestInt_Tolerant(t *testing.T) {
 	// if no tolerance is specified, values should be compared exactly
-	TestExactInt(t, TolerantEqualer{})
+	TestExactInt64(t, TolerantEqualer{})
 
 	// if tolerance is 0, values should be compared exactly
-	TestExactInt(t, TolerantEqualer{Tolerance: 0})
+	TestExactInt64(t, TolerantEqualer{Tolerance: 0})
 
 	// if a tolerance is set, values within the tolerance should be considered equal
 	e := TolerantEqualer{Tolerance: 2}
 	type testCase struct {
-		a        int
-		b        int
+		a        int64
+		b        int64
 		expected bool
 	}
 	tcs := []testCase{
@@ -45,7 +45,7 @@ func TestInt_Tolerant(t *testing.T) {
 		{a: 3, b: -3, expected: false},
 	}
 	for _, tc := range tcs {
-		if actual := e.Int(tc.a, tc.b); actual != tc.expected {
+		if actual := e.Int64(tc.a, tc.b); actual != tc.expected {
 			t.Errorf("[%v == %v] expected %v; got %v", tc.a, tc.b, tc.expected, actual)
 		}
 	}

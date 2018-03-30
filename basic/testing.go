@@ -23,11 +23,11 @@ func TestExactBool(t *testing.T, e Equaler) {
 	}
 }
 
-// TestExactInt tests if an equaler compares two integer values exactly.
-func TestExactInt(t *testing.T, e Equaler) {
+// TestExactInt64 tests if an equaler compares two integer values exactly.
+func TestExactInt64(t *testing.T, e Equaler) {
 	type testCase struct {
-		a        int
-		b        int
+		a        int64
+		b        int64
 		expected bool
 	}
 	tcs := []testCase{
@@ -47,7 +47,7 @@ func TestExactInt(t *testing.T, e Equaler) {
 	}
 
 	for _, tc := range tcs {
-		if actual := e.Int(tc.a, tc.b); actual != tc.expected {
+		if actual := e.Int64(tc.a, tc.b); actual != tc.expected {
 			t.Errorf("[%v == %v] expected %v; got %v", tc.a, tc.b, tc.expected, actual)
 		}
 	}

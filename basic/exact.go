@@ -8,8 +8,8 @@ func (tc ExactEqualer) Bool(a, b bool) bool {
 	return a == b
 }
 
-// Int compares two integer values exactly.
-func (tc ExactEqualer) Int(a, b int) bool {
+// Int64 compares two integer values exactly.
+func (tc ExactEqualer) Int64(a, b int64) bool {
 	return a == b
 }
 
