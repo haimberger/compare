@@ -1,4 +1,4 @@
-package equal
+package basic
 
 import (
 	"math"

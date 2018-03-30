@@ -1,6 +1,7 @@
-package equal
+// Package basic provides functionality for comparing values of basic types.
+package basic
 
-// BasicEqualer specifies methods for comparing values for basic types.
+// BasicEqualer implements functions for determining if values of basic types are equal.
 type BasicEqualer interface {
 	Bool(bool, bool) bool
 	Int(int, int) bool

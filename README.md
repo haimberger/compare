@@ -1,6 +1,6 @@
 # compare
 
-Package `compare` implements functions for comparing values.
+Package `compare` provides customizable functionality for comparing values.
 
 ## Development
 
@@ -12,7 +12,7 @@ It will concurrently run a bunch of linters including [go vet](https://golang.or
 
 You can also run linters for individual packages:
 
-    make equal.lint // run linters in equal package
+    make basic.lint // run linters in basic package
 
 ## Testing
 
@@ -28,5 +28,5 @@ It will save the coverage information to a file, then open a browser window show
 
 If you only want to run tests for one package, there are commands for that as well:
 
-    make equal.test  # run tests in equal package
-    make equal.cov   # show coverage information for equal package
+    make basic.test  # run tests in basic package
+    make basic.cov   # show coverage information for basic package
