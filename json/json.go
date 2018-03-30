@@ -8,8 +8,13 @@ import (
 	"github.com/haimberger/compare/basic"
 )
 
+// Equaler implements functions for determining if JSON strings are equal.
+type Equaler struct {
+	Basic basic.Equaler
+}
+
 // Equal determines if two JSON strings represent the same value.
-func Equal(s1, s2 []byte, be basic.Equaler) (bool, error) {
+func (e Equaler) Equal(s1, s2 []byte) (bool, error) {
 	var v1, v2 interface{}
 
 	if err := json.Unmarshal(s1, &v1); err != nil {
@@ -19,10 +24,10 @@ func Equal(s1, s2 []byte, be basic.Equaler) (bool, error) {
 		return false, err
 	}
 
-	return equal(v1, v2, be), nil
+	return e.equal(v1, v2), nil
 }
 
-func equal(v1, v2 interface{}, be basic.Equaler) bool {
+func (e Equaler) equal(v1, v2 interface{}) bool {
 	if v1 == nil || v2 == nil {
 		return v1 == v2
 	}
@@ -33,28 +38,28 @@ func equal(v1, v2 interface{}, be basic.Equaler) bool {
 
 	switch a := v1.(type) {
 	case []interface{}:
-		return equalArrays(a, v2.([]interface{}), be)
+		return e.equalArrays(a, v2.([]interface{}))
 	case map[string]interface{}:
-		return equalObjects(a, v2.(map[string]interface{}), be)
+		return e.equalObjects(a, v2.(map[string]interface{}))
 	case bool:
-		return be.Bool(a, v2.(bool))
+		return e.Basic.Bool(a, v2.(bool))
 	case float64:
-		return be.Float64(a, v2.(float64))
+		return e.Basic.Float64(a, v2.(float64))
 	case string:
-		return be.String(a, v2.(string))
+		return e.Basic.String(a, v2.(string))
 	default:
 		// should never happen (https://golang.org/pkg/encoding/json/#Unmarshal)
 		return reflect.DeepEqual(v1, v2)
 	}
 }
 
-func equalArrays(a, b []interface{}, be basic.Equaler) bool {
+func (e Equaler) equalArrays(a, b []interface{}) bool {
 	if len(a) != len(b) {
 		return false
 	}
 
 	for i, v := range a {
-		if !equal(v, b[i], be) {
+		if !e.equal(v, b[i]) {
 			return false
 		}
 	}
@@ -62,13 +67,13 @@ func equalArrays(a, b []interface{}, be basic.Equaler) bool {
 	return true
 }
 
-func equalObjects(a, b map[string]interface{}, be basic.Equaler) bool {
+func (e Equaler) equalObjects(a, b map[string]interface{}) bool {
 	if len(a) != len(b) {
 		return false
 	}
 
 	for k, v := range a {
-		if !equal(v, b[k], be) {
+		if !e.equal(v, b[k]) {
 			return false
 		}
 	}

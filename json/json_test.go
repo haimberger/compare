@@ -49,9 +49,9 @@ func TestEqual_Exact(t *testing.T) {
 			expected: false,
 		},
 	}
-	be := basic.ExactEqualer{}
+	e := Equaler{Basic: basic.ExactEqualer{}}
 	for _, tc := range tcs {
-		actual, err := Equal([]byte(tc.a), []byte(tc.b), be)
+		actual, err := e.Equal([]byte(tc.a), []byte(tc.b))
 		if err != nil {
 			if tc.err == "" {
 				t.Errorf("[%v == %v] %v", tc.a, tc.b, err)
@@ -77,9 +77,9 @@ func TestEqual_Tolerant(t *testing.T) {
 		{a: `0.1`, b: `0.151`, expected: false},
 		{a: `[0.1,0.1,0.1,0.1,0.1]`, b: `[0.05,0.1,0.10,0.14,0.15]`, expected: true},
 	}
-	be := basic.TolerantEqualer{Tolerance: 0.05}
+	e := Equaler{Basic: basic.TolerantEqualer{Tolerance: 0.05}}
 	for _, tc := range tcs {
-		actual, err := Equal([]byte(tc.a), []byte(tc.b), be)
+		actual, err := e.Equal([]byte(tc.a), []byte(tc.b))
 		if err != nil {
 			if tc.err == "" {
 				t.Errorf("[%v == %v] %v", tc.a, tc.b, err)
@@ -117,9 +117,9 @@ func TestEqual_Time(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	be := basic.TimeEqualer{Layout: time.RFC3339Nano, Tolerance: tolerance}
+	e := Equaler{Basic: basic.TimeEqualer{Layout: time.RFC3339Nano, Tolerance: tolerance}}
 	for _, tc := range tcs {
-		actual, err := Equal([]byte(tc.a), []byte(tc.b), be)
+		actual, err := e.Equal([]byte(tc.a), []byte(tc.b))
 		if err != nil {
 			if tc.err == "" {
 				t.Errorf("[%v == %v] %v", tc.a, tc.b, err)
