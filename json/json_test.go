@@ -15,41 +15,45 @@ func TestEqual_Exact(t *testing.T) {
 		err      string
 	}
 	tcs := []testCase{
-		{a: ``, b: ``, err: "unexpected end of JSON input"},
-		{a: `""`, b: ``, err: "unexpected end of JSON input"},
-		{a: `undefined`, b: `undefined`, err: "invalid character 'u' looking for beginning of value"},
-		{a: `null`, b: `null`, expected: true},
-		{a: `null`, b: `false`, expected: false},
-		{a: `null`, b: `""`, expected: false},
-		{a: `false`, b: `false`, expected: true},
-		{a: `false`, b: `true`, expected: false},
-		{a: `1`, b: `1`, expected: true},
-		{a: `1`, b: `2`, expected: false},
-		{a: `0.1`, b: `0.1`, expected: true},
-		{a: `0.1`, b: `0.2`, expected: false},
-		{a: `"foo"`, b: `"foo"`, expected: true},
-		{a: `"foo"`, b: `"bar"`, expected: false},
-		{a: `[false, 1, 0.1, "foo"]`, b: `[false,1,0.100,"foo"]`, expected: true},
-		{a: `[false, 1, 0.1, "foo"]`, b: `[false, 1, 0.2, "foo"]`, expected: false},
-		{a: `[false, 1, 0.1, "foo"]`, b: `[false, 0.1, 1, "foo"]`, expected: false},
-		{a: `[false, 1, 0.1]`, b: `[false, 1, 0.1, "foo"]`, expected: false},
+		{``, ``, false, "unexpected end of JSON input"},
+		{`""`, ``, false, "unexpected end of JSON input"},
+		{`undefined`, `undefined`, false, "invalid character 'u' looking for beginning of value"},
+		{`null`, `null`, true, ""},
+		{`null`, `false`, false, ""},
+		{`null`, `""`, false, ""},
+		{`false`, `false`, true, ""},
+		{`false`, `true`, false, ""},
+		{`1`, `1`, true, ""},
+		{`1`, `2`, false, ""},
+		{`0.1`, `0.1`, true, ""},
+		{`0.1`, `0.2`, false, ""},
+		{`"foo"`, `"foo"`, true, ""},
+		{`"foo"`, `"bar"`, false, ""},
+		{`[false, 1, 0.1, "foo"]`, `[false,1,0.100,"foo"]`, true, ""},
+		{`[false, 1, 0.1, "foo"]`, `[false, 1, 0.2, "foo"]`, false, ""},
+		{`[false, 1, 0.1, "foo"]`, `[false, 0.1, 1, "foo"]`, false, ""},
+		{`[false, 1, 0.1]`, `[false, 1, 0.1, "foo"]`, false, ""},
 		{
-			a:        `{"a": false, "b": [1, {"c": 0.1, "d": "foo"}]}`,
-			b:        `{"b": [1, {"d": "foo", "c": 0.1}],"a":false}`,
-			expected: true,
+			`{"a": false, "b": [1, {"c": 0.1, "d": "foo"}]}`,
+			`{"b": [1, {"d": "foo", "c": 0.1}],"a":false}`,
+			true,
+			"",
 		},
 		{
-			a:        `{"b": [1, {"c": 0.1, "d": "foo"}]}`,
-			b:        `{"a": false, "b": [1, {"c": 0.1, "d": "foo"}]}`,
-			expected: false,
+			`{"b": [1, {"c": 0.1, "d": "foo"}]}`,
+			`{"a": false, "b": [1, {"c": 0.1, "d": "foo"}]}`,
+			false,
+			"",
 		},
 		{
-			a:        `{"a": false, "b": [1, {"c": 0.1, "d": "foo"}]}`,
-			b:        `{"a": false, "b": [1, {"d": 0.1, "c": "foo"}]}`,
-			expected: false,
+			`{"a": false, "b": [1, {"c": 0.1, "d": "foo"}]}`,
+			`{"a": false, "b": [1, {"d": 0.1, "c": "foo"}]}`,
+			false,
+			"",
 		},
 	}
-	e := Equaler{Basic: basic.ExactEqualer{}}
+	// since we specify no tolerances, the equaler will compare values exactly
+	e := Equaler{Basic: basic.TolerantEqualer{}}
 	for _, tc := range tcs {
 		actual, err := e.Equal([]byte(tc.a), []byte(tc.b))
 		if err != nil {
@@ -73,43 +77,31 @@ func TestEqual_Tolerant(t *testing.T) {
 		expected bool
 	}
 	tcs := []testCase{
-		{a: `0.1`, b: `0.151`, expected: false},
-		{a: `[0.1,0.1,0.1,0.1,0.1]`, b: `[0.05,0.1,0.10,0.14,0.15]`, expected: true},
-	}
-	e := Equaler{Basic: basic.TolerantEqualer{Tolerance: 0.05}}
-	for _, tc := range tcs {
-		actual, err := e.Equal([]byte(tc.a), []byte(tc.b))
-		if err != nil {
-			t.Errorf("[%v == %v] %v", tc.a, tc.b, err)
-		} else if actual != tc.expected {
-			t.Errorf("[%v == %v] expected %v; got %v", tc.a, tc.b, tc.expected, actual)
-		}
-	}
-}
-
-func TestEqual_Time(t *testing.T) {
-	type testCase struct {
-		a        string
-		b        string
-		expected bool
-	}
-	tcs := []testCase{
+		{`0.1`, `0.151`, false},
+		{`[0.1,0.1,0.1,0.1,0.1]`, `[0.05,0.1,0.10,0.14,0.15]`, true},
+		{`"foo_1_1"`, `"foo_2_1"`, false},
+		{`["foo_1_1", "foo_1_1"]`, `["foo_1_2", "foo_1_abc"]`, true},
+		{`"2018-03-30T16:41:11.509Z"`, `"2018-03-30T16:41:12.510Z"`, false},
 		{
-			a:        `"2018-03-30T16:41:11.509Z"`,
-			b:        `"2018-03-30T16:41:12.510Z"`,
-			expected: false,
+			`["2018-03-30T16:41:11.509Z","2018-03-30T16:41:12.5Z"]`,
+			`["2018-03-30T16:41:11.509Z","2018-03-30T16:41:12.509Z"]`,
+			true,
 		},
-		{
-			a:        `["2018-03-30T16:41:11.509Z","2018-03-30T16:41:12.5Z"]`,
-			b:        `["2018-03-30T16:41:11.509Z","2018-03-30T16:41:12.509Z"]`,
-			expected: true,
-		},
+	}
+	sd, err := basic.MkSubstringDeleter("_[^_]*$") // ignore everything after last underscore
+	if err != nil {
+		t.Fatal(err)
 	}
 	tolerance, err := time.ParseDuration("1s")
 	if err != nil {
 		t.Fatal(err)
 	}
-	e := Equaler{Basic: basic.TimeEqualer{Layout: time.RFC3339Nano, Tolerance: tolerance}}
+	e := Equaler{Basic: basic.TolerantEqualer{
+		Float64Tolerance:  0.05,
+		StringTransformer: sd,
+		TimeLayout:        time.RFC3339Nano,
+		TimeTolerance:     tolerance,
+	}}
 	for _, tc := range tcs {
 		actual, err := e.Equal([]byte(tc.a), []byte(tc.b))
 		if err != nil {

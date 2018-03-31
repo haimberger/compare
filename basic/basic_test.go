@@ -1,0 +1,188 @@
+package basic
+
+import (
+	"testing"
+	"time"
+)
+
+func TestBool_Tolerant(t *testing.T) {
+	type testCase struct {
+		a        bool
+		b        bool
+		expected bool
+	}
+	tcs := []testCase{
+		{false, false, true},
+		{false, true, false},
+		{true, false, false},
+		{true, true, true},
+	}
+	e := TolerantEqualer{}
+	for _, tc := range tcs {
+		if actual := e.Bool(tc.a, tc.b); actual != tc.expected {
+			t.Errorf("[%v == %v] expected %v; got %v", tc.a, tc.b, tc.expected, actual)
+		}
+	}
+}
+
+func TestInt_Tolerant(t *testing.T) {
+	type testCase struct {
+		a        int64
+		b        int64
+		expected bool
+	}
+	tcs := []testCase{
+		{0, 0, true},
+		{1, 1, true},
+		{0, 1, false},
+		{1, 0, false},
+		{1, 2, false},
+		{2, 1, false},
+		{0, -1, false},
+		{-1, 0, false},
+		{-1, -1, true},
+		{-1, -2, false},
+		{-2, -1, false},
+		{-1, 1, false},
+		{1, -1, false},
+	}
+	e := TolerantEqualer{}
+	for _, tc := range tcs {
+		if actual := e.Int64(tc.a, tc.b); actual != tc.expected {
+			t.Errorf("[%v == %v] expected %v; got %v", tc.a, tc.b, tc.expected, actual)
+		}
+	}
+}
+
+func TestFloat64_Tolerant(t *testing.T) {
+	type testCase struct {
+		a        float64
+		b        float64
+		expected bool
+	}
+
+	exact := []testCase{
+		{0, 0, true},
+		{0, 0.1, false},
+		{0.1, 0, false},
+		{0.1, 0.1, true},
+		{0.1, 0.2, false},
+		{0.2, 0.1, false},
+		{0, -0.1, false},
+		{-0.1, 0, false},
+		{-0.1, -0.1, true},
+		{-0.1, -0.2, false},
+		{-0.2, -0.1, false},
+		{-0.1, 0.1, false},
+		{0.1, -0.1, false},
+	}
+
+	approximate := []testCase{
+		{0, 0, true},
+		{0, 0.05, true},
+		{0.05, 0, true},
+		{0, 0.1, false},
+		{0.1, 0, false},
+		{0.1, 0.1, true},
+		{0.1, 0.15, true},
+		{0.15, 0.1, true},
+		{0.1, 0.2, false},
+		{0.2, 0.1, false},
+		{0, -0.05, true},
+		{-0.05, 0, true},
+		{0, -0.1, false},
+		{-0.1, 0, false},
+		{-0.1, -0.1, true},
+		{-0.1, -0.15, true},
+		{-0.15, -0.1, true},
+		{-0.1, -0.2, false},
+		{-0.2, -0.1, false},
+		{-0.1, 0.1, false},
+		{0.1, -0.1, false},
+	}
+
+	// if no tolerance is specified, values should be compared exactly
+	e := TolerantEqualer{}
+	for _, tc := range exact {
+		if actual := e.Float64(tc.a, tc.b); actual != tc.expected {
+			t.Errorf("[%v == %v] expected %v; got %v", tc.a, tc.b, tc.expected, actual)
+		}
+	}
+
+	// if tolerance is 0, values should be compared exactly
+	e = TolerantEqualer{Float64Tolerance: 0}
+	for _, tc := range exact {
+		if actual := e.Float64(tc.a, tc.b); actual != tc.expected {
+			t.Errorf("[%v == %v] expected %v; got %v", tc.a, tc.b, tc.expected, actual)
+		}
+	}
+
+	// if a tolerance is set, values within the tolerance should be considered equal
+	e = TolerantEqualer{Float64Tolerance: 0.05}
+	for _, tc := range approximate {
+		if actual := e.Float64(tc.a, tc.b); actual != tc.expected {
+			t.Errorf("[%v == %v] expected %v; got %v", tc.a, tc.b, tc.expected, actual)
+		}
+	}
+}
+
+func TestString_Tolerant(t *testing.T) {
+	// if a tolerance is specified, valid dates within the tolerance should be considered equal
+	type testCase struct {
+		a        string
+		b        string
+		expected bool
+	}
+
+	exact := []testCase{
+		{"", "", true},
+		{"", "foo", false},
+		{"foo", "", false},
+		{"foo", "foo", true},
+		{"foo", "bar", false},
+		{"bar", "foo", false},
+	}
+
+	approximate := []testCase{
+		{"2018-03-30T16:41:11.509Z", "2018-03-30T16:41:11.509Z", true},
+		{"2018-03-30T16:41:11.509Z", "2018-03-30T16:41:12.509Z", true},
+		{"2018-03-30T16:41:12.509Z", "2018-03-30T16:41:11.509Z", true},
+		{"2018-03-30T16:41:11.509Z", "2018-03-30T16:41:12.510Z", false},
+		{"2018-03-30T16:41:12.510Z", "2018-03-30T16:41:11.509Z", false},
+		{"2018-03-30T16:41:11.509Z", "foo", false},
+		{"foo", "2018-03-30T16:41:11.509Z", false},
+		{"2018-03-30T16:41:11.509Z", "30-Mar-18 16:41:11.509Z", false},
+		{"30-Mar-18 16:41:11.509Z", "2018-03-30T16:41:11.509Z", false},
+		{"foo_1_1", "foo_1_2", true},
+		{"foo_1_1", "foo_2_1", false},
+		{"foo", "foo", true},
+		{"foo", "bar", false},
+	}
+
+	// if no special options are specified, values should be compared exactly
+	e := TolerantEqualer{}
+	for _, tc := range exact {
+		if actual := e.String(tc.a, tc.b); actual != tc.expected {
+			t.Errorf("[%v == %v] expected %v; got %v", tc.a, tc.b, tc.expected, actual)
+		}
+	}
+
+	sd, err := MkSubstringDeleter("_[^_]*$") // ignore everything after last underscore
+	if err != nil {
+		t.Fatal(err)
+	}
+	tolerance, err := time.ParseDuration("1s")
+	if err != nil {
+		t.Fatal(err)
+	}
+	e = TolerantEqualer{
+		StringTransformer: sd,
+		TimeLayout:        time.RFC3339Nano,
+		TimeTolerance:     tolerance,
+	}
+	for _, tc := range approximate {
+		if actual := e.String(tc.a, tc.b); actual != tc.expected {
+			t.Errorf("[%v == %v] expected %v; got %v", tc.a, tc.b, tc.expected, actual)
+		}
+	}
+}

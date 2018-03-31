@@ -90,7 +90,8 @@ func TestEqual_Exact(t *testing.T) {
 		//{[]float64{math.NaN()}, self{}, true, ""},
 		//{map[float64]float64{math.NaN(): 1}, self{}, true, ""},
 	}
-	e := Equaler{Basic: basic.ExactEqualer{}}
+	// since we specify no tolerances, the equaler will compare values exactly
+	e := Equaler{Basic: basic.TolerantEqualer{}}
 	for _, tc := range tcs {
 		actual, err := e.Equal(tc.a, tc.b)
 		if err != nil {
@@ -114,52 +115,36 @@ func TestEqual_Tolerant(t *testing.T) {
 		expected bool
 	}
 	tcs := []testCase{
-		{a: 0.1, b: 0.151, expected: false},
-		{
-			a:        []float64{0.1, 0.1, 0.1, 0.1, 0.1},
-			b:        []float64{0.05, 0.1, 0.10, 0.14, 0.15},
-			expected: true,
-		},
+		{0.1, 0.151, false},
+		{[]float64{0.1, 0.1, 0.1, 0.1, 0.1}, []float64{0.05, 0.1, 0.10, 0.14, 0.15}, true},
 		// The following test fails because the tolerance is specified as a float64 value,
 		// but the values are specified as float32 values, which are less precise.
 		// For example, the float32 value 0.05 is actually 0.05000000074505806.
 		// TODO: specify separate tolerances for float32 and float64?
-		//{a: []float32{0.05}, b: []float32{0.1}, expected: true},
-	}
-	e := Equaler{Basic: basic.TolerantEqualer{Tolerance: 0.05}}
-	for _, tc := range tcs {
-		actual, err := e.Equal(tc.a, tc.b)
-		if err != nil {
-			t.Errorf("[%v == %v] %v", tc.a, tc.b, err)
-		} else if actual != tc.expected {
-			t.Errorf("[%v == %v] expected %v; got %v", tc.a, tc.b, tc.expected, actual)
-		}
-	}
-}
-
-func TestEqual_Time(t *testing.T) {
-	type testCase struct {
-		a        interface{}
-		b        interface{}
-		expected bool
-	}
-	tcs := []testCase{
+		//{[]float32{0.05}, []float32{0.1}, true},
+		{"foo_1_1", "foo_2_1", false},
+		{[]string{"foo_1_1", "foo_1_1"}, []string{"foo_1_2", "foo_1_abc"}, true},
+		{"2018-03-30T16:41:11.509Z", "2018-03-30T16:41:12.510Z", false},
 		{
-			a:        "2018-03-30T16:41:11.509Z",
-			b:        "2018-03-30T16:41:12.510Z",
-			expected: false,
+			[]string{"2018-03-30T16:41:11.509Z", "2018-03-30T16:41:12.5Z"},
+			[]string{"2018-03-30T16:41:11.509Z", "2018-03-30T16:41:12.509Z"},
+			true,
 		},
-		{
-			a:        []string{"2018-03-30T16:41:11.509Z", "2018-03-30T16:41:12.5Z"},
-			b:        []string{"2018-03-30T16:41:11.509Z", "2018-03-30T16:41:12.509Z"},
-			expected: true,
-		},
+	}
+	sd, err := basic.MkSubstringDeleter("_[^_]*$") // ignore everything after last underscore
+	if err != nil {
+		t.Fatal(err)
 	}
 	tolerance, err := time.ParseDuration("1s")
 	if err != nil {
 		t.Fatal(err)
 	}
-	e := Equaler{Basic: basic.TimeEqualer{Layout: time.RFC3339Nano, Tolerance: tolerance}}
+	e := Equaler{Basic: basic.TolerantEqualer{
+		Float64Tolerance:  0.05,
+		StringTransformer: sd,
+		TimeLayout:        time.RFC3339Nano,
+		TimeTolerance:     tolerance,
+	}}
 	for _, tc := range tcs {
 		actual, err := e.Equal(tc.a, tc.b)
 		if err != nil {
