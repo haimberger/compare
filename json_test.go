@@ -51,7 +51,7 @@ func TestJSONEqualer_Equal_exact(t *testing.T) {
 		},
 	}
 	// since we specify no tolerances, the equaler will compare values exactly
-	e := JSONEqualer{Basic: TolerantBasicEqualer{}}
+	e := &JSONDiffer{Basic: TolerantBasicEqualer{}}
 	for _, tc := range tcs {
 		actual, err := e.Equal([]byte(tc.a), []byte(tc.b))
 		if err != nil {
@@ -93,7 +93,7 @@ func TestJSONEqualer_Equal_tolerant(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	e := JSONEqualer{Basic: TolerantBasicEqualer{
+	e := &JSONDiffer{Basic: TolerantBasicEqualer{
 		Float64Tolerance:  0.05,
 		StringTransformer: sd,
 		TimeLayout:        time.RFC3339Nano,
