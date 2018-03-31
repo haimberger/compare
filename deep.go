@@ -6,7 +6,7 @@ import (
 	"reflect"
 )
 
-// DeepEqualer provides functions for deeep comparison of values.
+// DeepEqualer provides functionality for the deep comparison of values.
 type DeepEqualer struct {
 	// Basic specifies how values of basic types should be compared.
 	Basic BasicEqualer
@@ -14,15 +14,31 @@ type DeepEqualer struct {
 
 // Equal determines if two values contain the same information.
 //
-// Shortcomings:
+// The implementation closely follows the implementation of reflect.DeepEqual(),
+// but with certain limitations:
 //
-// 	- we assume that there are no loops
-// 	- there are no plans to support the comparison of functions
-// 	- some basic types, like uint and complex128, aren't yet supported
-// 	- behaviour when comparing values with an empty struct (e.g. `type self struct{}`)
-// 	  is different from the behaviour of reflect.DeepEqual(); not quite sure why...
+// 1. Unlike reflect.DeepEqual(), we assume that there are no loops and don't
+// safeguard against them at all.
 //
-// The implementation closely follows the implementation of reflect.DeepEqual().
+// 2. We have no plans to support the comparison of functions.
+// Even reflect.DeepEqual() only has minimal support for them, returning true if
+// both functions are nil and false otherwise. We simply return an error.
+//
+// 3. There are some basic types that we don't yet support, but plan to.
+// The basic types that we *do* support are: bool, int, int8, int16, int32,
+// int64, float32, float64, string. Since rune is just an alias of int32, we
+// support it as well. For any other basic types, like unsigned integers and
+// complex numbers, we return an error.
+//
+// 4. Generally speaking, if we come across a type that we don't support, we
+// return an error rather than applying some default method of comparison as
+// reflect.DeepEqual() does. This shouldn't be too limiting, however, since we
+// do support the most common types, including arrays, interfaces, maps,
+// pointers, slices, structs, and the basic types listed above.
+//
+// 5. For some reason that's not clear to me, our behaviour when comparing
+// values with an empty struct (e.g. `type self struct{}`) is different from the
+// behaviour of reflect.DeepEqual().
 func (e DeepEqualer) Equal(a, b interface{}) (bool, error) {
 	return e.equal(reflect.ValueOf(a), reflect.ValueOf(b))
 }

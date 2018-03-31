@@ -25,15 +25,15 @@ type StringTransformer interface {
 	Transform(string) string
 }
 
-// SubstringDeleter provides a function for deleting substrings matching a
-// regular expression from strings.
+// SubstringDeleter provides functionality for deleting substrings matching a
+// regular expression.
 type SubstringDeleter struct {
 	// Regexp specifies which substrings should be deleted.
 	Regexp *regexp.Regexp
 }
 
 // MkSubstringDeleter creates a new SubstringDeleter based on the specified
-// string representation of a regular expression.
+// regular expression.
 func MkSubstringDeleter(expr string) (SubstringDeleter, error) {
 	re, err := regexp.Compile(expr)
 	if err != nil {

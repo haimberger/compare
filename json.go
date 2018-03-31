@@ -5,13 +5,14 @@ import (
 	"reflect"
 )
 
-// JSONEqualer provides functions for determining if JSON strings are equal.
+// JSONEqualer provides functionality for determining if JSON strings are equal.
 type JSONEqualer struct {
 	// Basic specifies how values of basic types should be compared.
 	Basic BasicEqualer
 }
 
 // Equal determines if two JSON strings represent the same value.
+// Returns an error iff the strings don't adhere to the JSON syntax.
 func (e JSONEqualer) Equal(s1, s2 []byte) (bool, error) {
 	var v1, v2 interface{}
 
