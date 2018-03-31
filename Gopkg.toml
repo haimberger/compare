@@ -1,0 +1,11 @@
+# Refer to https://github.com/golang/dep/blob/master/docs/Gopkg.toml.md
+# for detailed Gopkg.toml documentation.
+
+[[constraint]]
+  name = "github.com/yudai/gojsondiff"
+  version = "1.0.0"
+
+[prune]
+  non-go = true
+  go-tests = true
+  unused-packages = true
