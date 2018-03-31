@@ -1,5 +1,7 @@
 # compare
 
+[![GoDoc](https://godoc.org/github.com/haimberger/compare?status.svg)](https://godoc.org/github.com/haimberger/compare)
+
 Package `compare` provides customizable functionality for comparing values.
 
 ## Development
