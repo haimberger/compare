@@ -71,7 +71,6 @@ func TestEqual_Tolerant(t *testing.T) {
 		a        string
 		b        string
 		expected bool
-		err      string
 	}
 	tcs := []testCase{
 		{a: `0.1`, b: `0.151`, expected: false},
@@ -81,13 +80,7 @@ func TestEqual_Tolerant(t *testing.T) {
 	for _, tc := range tcs {
 		actual, err := e.Equal([]byte(tc.a), []byte(tc.b))
 		if err != nil {
-			if tc.err == "" {
-				t.Errorf("[%v == %v] %v", tc.a, tc.b, err)
-			} else if err.Error() != tc.err {
-				t.Errorf("[%v == %v] expected error %v; got %v", tc.a, tc.b, tc.err, err)
-			}
-		} else if tc.err != "" {
-			t.Errorf("[%v == %v] expected error %v; got nothing", tc.a, tc.b, tc.err)
+			t.Errorf("[%v == %v] %v", tc.a, tc.b, err)
 		} else if actual != tc.expected {
 			t.Errorf("[%v == %v] expected %v; got %v", tc.a, tc.b, tc.expected, actual)
 		}
@@ -99,7 +92,6 @@ func TestEqual_Time(t *testing.T) {
 		a        string
 		b        string
 		expected bool
-		err      string
 	}
 	tcs := []testCase{
 		{
@@ -121,13 +113,7 @@ func TestEqual_Time(t *testing.T) {
 	for _, tc := range tcs {
 		actual, err := e.Equal([]byte(tc.a), []byte(tc.b))
 		if err != nil {
-			if tc.err == "" {
-				t.Errorf("[%v == %v] %v", tc.a, tc.b, err)
-			} else if err.Error() != tc.err {
-				t.Errorf("[%v == %v] expected error %v; got %v", tc.a, tc.b, tc.err, err)
-			}
-		} else if tc.err != "" {
-			t.Errorf("[%v == %v] expected error %v; got nothing", tc.a, tc.b, tc.err)
+			t.Errorf("[%v == %v] %v", tc.a, tc.b, err)
 		} else if actual != tc.expected {
 			t.Errorf("[%v == %v] expected %v; got %v", tc.a, tc.b, tc.expected, actual)
 		}
