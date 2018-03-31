@@ -1,4 +1,4 @@
-package basic
+package compare
 
 import (
 	"testing"
@@ -17,7 +17,7 @@ func TestBool_Tolerant(t *testing.T) {
 		{true, false, false},
 		{true, true, true},
 	}
-	e := TolerantEqualer{}
+	e := TolerantBasicEqualer{}
 	for _, tc := range tcs {
 		if actual := e.Bool(tc.a, tc.b); actual != tc.expected {
 			t.Errorf("[%v == %v] expected %v; got %v", tc.a, tc.b, tc.expected, actual)
@@ -46,7 +46,7 @@ func TestInt_Tolerant(t *testing.T) {
 		{-1, 1, false},
 		{1, -1, false},
 	}
-	e := TolerantEqualer{}
+	e := TolerantBasicEqualer{}
 	for _, tc := range tcs {
 		if actual := e.Int64(tc.a, tc.b); actual != tc.expected {
 			t.Errorf("[%v == %v] expected %v; got %v", tc.a, tc.b, tc.expected, actual)
@@ -102,7 +102,7 @@ func TestFloat64_Tolerant(t *testing.T) {
 	}
 
 	// if no tolerance is specified, values should be compared exactly
-	e := TolerantEqualer{}
+	e := TolerantBasicEqualer{}
 	for _, tc := range exact {
 		if actual := e.Float64(tc.a, tc.b); actual != tc.expected {
 			t.Errorf("[%v == %v] expected %v; got %v", tc.a, tc.b, tc.expected, actual)
@@ -110,7 +110,7 @@ func TestFloat64_Tolerant(t *testing.T) {
 	}
 
 	// if tolerance is 0, values should be compared exactly
-	e = TolerantEqualer{Float64Tolerance: 0}
+	e = TolerantBasicEqualer{Float64Tolerance: 0}
 	for _, tc := range exact {
 		if actual := e.Float64(tc.a, tc.b); actual != tc.expected {
 			t.Errorf("[%v == %v] expected %v; got %v", tc.a, tc.b, tc.expected, actual)
@@ -118,7 +118,7 @@ func TestFloat64_Tolerant(t *testing.T) {
 	}
 
 	// if a tolerance is set, values within the tolerance should be considered equal
-	e = TolerantEqualer{Float64Tolerance: 0.05}
+	e = TolerantBasicEqualer{Float64Tolerance: 0.05}
 	for _, tc := range approximate {
 		if actual := e.Float64(tc.a, tc.b); actual != tc.expected {
 			t.Errorf("[%v == %v] expected %v; got %v", tc.a, tc.b, tc.expected, actual)
@@ -160,7 +160,7 @@ func TestString_Tolerant(t *testing.T) {
 	}
 
 	// if no special options are specified, values should be compared exactly
-	e := TolerantEqualer{}
+	e := TolerantBasicEqualer{}
 	for _, tc := range exact {
 		if actual := e.String(tc.a, tc.b); actual != tc.expected {
 			t.Errorf("[%v == %v] expected %v; got %v", tc.a, tc.b, tc.expected, actual)
@@ -175,7 +175,7 @@ func TestString_Tolerant(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	e = TolerantEqualer{
+	e = TolerantBasicEqualer{
 		StringTransformer: sd,
 		TimeLayout:        time.RFC3339Nano,
 		TimeTolerance:     tolerance,

@@ -1,13 +1,11 @@
-package json
+package compare
 
 import (
 	"testing"
 	"time"
-
-	"github.com/haimberger/compare/basic"
 )
 
-func TestEqual_Exact(t *testing.T) {
+func TestEqual_JSON_Exact(t *testing.T) {
 	type testCase struct {
 		a        string
 		b        string
@@ -53,7 +51,7 @@ func TestEqual_Exact(t *testing.T) {
 		},
 	}
 	// since we specify no tolerances, the equaler will compare values exactly
-	e := Equaler{Basic: basic.TolerantEqualer{}}
+	e := JSONEqualer{Basic: TolerantBasicEqualer{}}
 	for _, tc := range tcs {
 		actual, err := e.Equal([]byte(tc.a), []byte(tc.b))
 		if err != nil {
@@ -69,8 +67,7 @@ func TestEqual_Exact(t *testing.T) {
 		}
 	}
 }
-
-func TestEqual_Tolerant(t *testing.T) {
+func TestEqual_JSON_Approximate(t *testing.T) {
 	type testCase struct {
 		a        string
 		b        string
@@ -88,7 +85,7 @@ func TestEqual_Tolerant(t *testing.T) {
 			true,
 		},
 	}
-	sd, err := basic.MkSubstringDeleter("_[^_]*$") // ignore everything after last underscore
+	sd, err := MkSubstringDeleter("_[^_]*$") // ignore everything after last underscore
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -96,7 +93,7 @@ func TestEqual_Tolerant(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	e := Equaler{Basic: basic.TolerantEqualer{
+	e := JSONEqualer{Basic: TolerantBasicEqualer{
 		Float64Tolerance:  0.05,
 		StringTransformer: sd,
 		TimeLayout:        time.RFC3339Nano,

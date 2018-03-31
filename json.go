@@ -1,20 +1,18 @@
-// Package json provides functionality for comparing JSON strings.
-package json
+package compare
 
 import (
 	"encoding/json"
 	"reflect"
-
-	"github.com/haimberger/compare/basic"
 )
 
-// Equaler implements functions for determining if JSON strings are equal.
-type Equaler struct {
-	Basic basic.Equaler
+// JSONEqualer provides functions for determining if JSON strings are equal.
+type JSONEqualer struct {
+	// Basic specifies how values of basic types should be compared.
+	Basic BasicEqualer
 }
 
 // Equal determines if two JSON strings represent the same value.
-func (e Equaler) Equal(s1, s2 []byte) (bool, error) {
+func (e JSONEqualer) Equal(s1, s2 []byte) (bool, error) {
 	var v1, v2 interface{}
 
 	if err := json.Unmarshal(s1, &v1); err != nil {
@@ -27,7 +25,7 @@ func (e Equaler) Equal(s1, s2 []byte) (bool, error) {
 	return e.equal(v1, v2), nil
 }
 
-func (e Equaler) equal(v1, v2 interface{}) bool {
+func (e JSONEqualer) equal(v1, v2 interface{}) bool {
 	if v1 == nil || v2 == nil {
 		return v1 == v2
 	}
@@ -53,7 +51,7 @@ func (e Equaler) equal(v1, v2 interface{}) bool {
 	}
 }
 
-func (e Equaler) equalArrays(a, b []interface{}) bool {
+func (e JSONEqualer) equalArrays(a, b []interface{}) bool {
 	if len(a) != len(b) {
 		return false
 	}
@@ -67,7 +65,7 @@ func (e Equaler) equalArrays(a, b []interface{}) bool {
 	return true
 }
 
-func (e Equaler) equalObjects(a, b map[string]interface{}) bool {
+func (e JSONEqualer) equalObjects(a, b map[string]interface{}) bool {
 	if len(a) != len(b) {
 		return false
 	}

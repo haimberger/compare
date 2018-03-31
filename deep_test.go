@@ -1,11 +1,9 @@
-package deep
+package compare
 
 import (
 	"math"
 	"testing"
 	"time"
-
-	"github.com/haimberger/compare/basic"
 )
 
 type foo struct {
@@ -15,7 +13,7 @@ type foo struct {
 
 type notFoo foo
 
-func TestEqual_Exact(t *testing.T) {
+func TestEqual_Deep_Exact(t *testing.T) {
 	type testCase struct {
 		a        interface{}
 		b        interface{}
@@ -91,7 +89,7 @@ func TestEqual_Exact(t *testing.T) {
 		//{map[float64]float64{math.NaN(): 1}, self{}, true, ""},
 	}
 	// since we specify no tolerances, the equaler will compare values exactly
-	e := Equaler{Basic: basic.TolerantEqualer{}}
+	e := DeepEqualer{Basic: TolerantBasicEqualer{}}
 	for _, tc := range tcs {
 		actual, err := e.Equal(tc.a, tc.b)
 		if err != nil {
@@ -107,8 +105,7 @@ func TestEqual_Exact(t *testing.T) {
 		}
 	}
 }
-
-func TestEqual_Tolerant(t *testing.T) {
+func TestEqual_Deep_Approximate(t *testing.T) {
 	type testCase struct {
 		a        interface{}
 		b        interface{}
@@ -131,7 +128,7 @@ func TestEqual_Tolerant(t *testing.T) {
 			true,
 		},
 	}
-	sd, err := basic.MkSubstringDeleter("_[^_]*$") // ignore everything after last underscore
+	sd, err := MkSubstringDeleter("_[^_]*$") // ignore everything after last underscore
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -139,7 +136,7 @@ func TestEqual_Tolerant(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	e := Equaler{Basic: basic.TolerantEqualer{
+	e := DeepEqualer{Basic: TolerantBasicEqualer{
 		Float64Tolerance:  0.05,
 		StringTransformer: sd,
 		TimeLayout:        time.RFC3339Nano,

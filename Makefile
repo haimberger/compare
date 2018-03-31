@@ -3,18 +3,12 @@
 default:
 	@echo "Usage: make [command]"
 
-lint: basic.lint json.lint deep.lint
-
-%.lint:
+lint:
 	@command -v gometalinter || (go get -u github.com/alecthomas/gometalinter && gometalinter --install)
-	@gometalinter ./$*
+	@gometalinter .
 
-test: basic.test json.test deep.test
+test:
+	@go test -v -race --cover . && echo ""
 
-%.test:
-	@go test -v -race --cover ./$* && echo ""
-
-test-coverage: basic.cov json.cov deep.cov
-
-%.cov:
-	@go test -coverprofile=$*/coverage.out ./$* && go tool cover -html=$*/coverage.out
+test-coverage:
+	@go test -coverprofile=coverage.out . && go tool cover -html=coverage.out

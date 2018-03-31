@@ -1,5 +1,4 @@
-// Package basic provides functionality for comparing values of basic types.
-package basic
+package compare
 
 import (
 	"math"
@@ -7,8 +6,8 @@ import (
 	"time"
 )
 
-// Equaler provides functions for determining if values of basic types are equal.
-type Equaler interface {
+// BasicEqualer provides functions for determining if values of basic types are equal.
+type BasicEqualer interface {
 	// Bool determines if two Boolean values are equal.
 	Bool(bool, bool) bool
 	// Int64 determines if two integer values are equal.
@@ -48,9 +47,9 @@ func (sd SubstringDeleter) Transform(s string) string {
 	return sd.Regexp.ReplaceAllString(s, "")
 }
 
-// TolerantEqualer is an example implementation of the Equaler interface.
+// TolerantBasicEqualer is an example implementation of the Equaler interface.
 // Rather than comparing values exactly, it allows some leeway.
-type TolerantEqualer struct {
+type TolerantBasicEqualer struct {
 	// Float64Tolerance specifies how much two floating-point values may differ
 	// while still being considered equal.
 	Float64Tolerance float64
@@ -65,20 +64,20 @@ type TolerantEqualer struct {
 }
 
 // Bool compares two Boolean values exactly.
-func (te TolerantEqualer) Bool(a, b bool) bool {
+func (e TolerantBasicEqualer) Bool(a, b bool) bool {
 	return a == b
 }
 
 // Int64 compares two integer values exactly.
-func (te TolerantEqualer) Int64(a, b int64) bool {
+func (e TolerantBasicEqualer) Int64(a, b int64) bool {
 	return a == b
 }
 
 // Float64 compares two floating-point numbers within a tolerance. For example,
 // if the tolerance is 0.5, then 4.07 and 4.57 are considered equal, but 4.07
 // and 4.571 are not.
-func (te TolerantEqualer) Float64(a, b float64) bool {
-	return math.Abs(a-b) <= te.Float64Tolerance
+func (e TolerantBasicEqualer) Float64(a, b float64) bool {
+	return math.Abs(a-b) <= e.Float64Tolerance
 }
 
 // String compares two string values.
@@ -94,22 +93,22 @@ func (te TolerantEqualer) Float64(a, b float64) bool {
 // both strings before comparing them.
 //
 // If neither of the above applies, the strings are compared exactly.
-func (te TolerantEqualer) String(a, b string) bool {
+func (e TolerantBasicEqualer) String(a, b string) bool {
 	// if a tolerance for time values is specified, try comparing the strings as times
-	if te.TimeTolerance.Nanoseconds() > 0 {
-		ta, erra := time.Parse(te.TimeLayout, a)
-		tb, errb := time.Parse(te.TimeLayout, b)
+	if e.TimeTolerance.Nanoseconds() > 0 {
+		ta, erra := time.Parse(e.TimeLayout, a)
+		tb, errb := time.Parse(e.TimeLayout, b)
 		if erra == nil && errb == nil {
 			diff := math.Abs(float64(ta.Sub(tb).Nanoseconds()))
-			tol := float64(te.TimeTolerance.Nanoseconds())
+			tol := float64(e.TimeTolerance.Nanoseconds())
 			return diff <= tol
 		}
 	}
 
 	// try transforming strings before comparing them
-	if te.StringTransformer != nil {
-		ta := te.StringTransformer.Transform(a)
-		tb := te.StringTransformer.Transform(b)
+	if e.StringTransformer != nil {
+		ta := e.StringTransformer.Transform(a)
+		tb := e.StringTransformer.Transform(b)
 		return ta == tb
 	}
 

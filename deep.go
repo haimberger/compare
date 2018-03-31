@@ -1,16 +1,14 @@
-// Package deep provides functionality for deep comparison of values.
-package deep
+package compare
 
 import (
 	"fmt"
 	"reflect"
-
-	"github.com/haimberger/compare/basic"
 )
 
-// Equaler implements functions for determining if values are equal.
-type Equaler struct {
-	Basic basic.Equaler
+// DeepEqualer provides functions for deeep comparison of values.
+type DeepEqualer struct {
+	// Basic specifies how values of basic types should be compared.
+	Basic BasicEqualer
 }
 
 // Equal determines if two values contain the same information.
@@ -24,7 +22,7 @@ type Equaler struct {
 // 	  is different from the behaviour of reflect.DeepEqual(); not quite sure why...
 //
 // The implementation closely follows the implementation of reflect.DeepEqual().
-func (e Equaler) Equal(a, b interface{}) (bool, error) {
+func (e DeepEqualer) Equal(a, b interface{}) (bool, error) {
 	return e.equal(reflect.ValueOf(a), reflect.ValueOf(b))
 }
 
@@ -34,7 +32,7 @@ func (e Equaler) Equal(a, b interface{}) (bool, error) {
 // cyclomatic complexity in a way that really feels like an improvement.
 // In any case, I think that the code is easy to follow as it is, and the test
 // coverage for this function is 100% despite the high number of execution paths.
-func (e Equaler) equal(v1, v2 reflect.Value) (bool, error) {
+func (e DeepEqualer) equal(v1, v2 reflect.Value) (bool, error) {
 	if !v1.IsValid() || !v2.IsValid() { // at least one underlying value was nil
 		return v1.IsValid() == v2.IsValid(), nil
 	}
@@ -69,7 +67,7 @@ func (e Equaler) equal(v1, v2 reflect.Value) (bool, error) {
 	}
 }
 
-func (e Equaler) equalArrays(v1, v2 reflect.Value) (bool, error) {
+func (e DeepEqualer) equalArrays(v1, v2 reflect.Value) (bool, error) {
 	for i := 0; i < v1.Len(); i++ {
 		if eq, err := e.equal(v1.Index(i), v2.Index(i)); err != nil || !eq {
 			return false, err
@@ -78,14 +76,14 @@ func (e Equaler) equalArrays(v1, v2 reflect.Value) (bool, error) {
 	return true, nil
 }
 
-func (e Equaler) equalInterfaces(v1, v2 reflect.Value) (bool, error) {
+func (e DeepEqualer) equalInterfaces(v1, v2 reflect.Value) (bool, error) {
 	if v1.IsNil() || v2.IsNil() {
 		return v1.IsNil() == v2.IsNil(), nil
 	}
 	return e.equal(v1.Elem(), v2.Elem())
 }
 
-func (e Equaler) equalMaps(v1, v2 reflect.Value) (bool, error) {
+func (e DeepEqualer) equalMaps(v1, v2 reflect.Value) (bool, error) {
 	if v1.IsNil() != v2.IsNil() {
 		return false, nil
 	}
@@ -107,14 +105,14 @@ func (e Equaler) equalMaps(v1, v2 reflect.Value) (bool, error) {
 	return true, nil
 }
 
-func (e Equaler) equalPointers(v1, v2 reflect.Value) (bool, error) {
+func (e DeepEqualer) equalPointers(v1, v2 reflect.Value) (bool, error) {
 	if v1.Pointer() == v2.Pointer() {
 		return true, nil
 	}
 	return e.equal(v1.Elem(), v2.Elem())
 }
 
-func (e Equaler) equalSlices(v1, v2 reflect.Value) (bool, error) {
+func (e DeepEqualer) equalSlices(v1, v2 reflect.Value) (bool, error) {
 	if v1.IsNil() != v2.IsNil() {
 		return false, nil
 	}
@@ -132,7 +130,7 @@ func (e Equaler) equalSlices(v1, v2 reflect.Value) (bool, error) {
 	return true, nil
 }
 
-func (e Equaler) equalStructs(v1, v2 reflect.Value) (bool, error) {
+func (e DeepEqualer) equalStructs(v1, v2 reflect.Value) (bool, error) {
 	for i := 0; i < v1.NumField(); i++ {
 		if eq, err := e.equal(v1.Field(i), v2.Field(i)); err != nil || !eq {
 			return false, err
