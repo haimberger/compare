@@ -13,7 +13,7 @@ type foo struct {
 
 type notFoo foo
 
-func TestEqual_Deep_Exact(t *testing.T) {
+func TestDeepEqualer_Equal_exact(t *testing.T) {
 	type testCase struct {
 		a        interface{}
 		b        interface{}
@@ -105,7 +105,7 @@ func TestEqual_Deep_Exact(t *testing.T) {
 		}
 	}
 }
-func TestEqual_Deep_Approximate(t *testing.T) {
+func TestDeepEqualer_Equal_tolerant(t *testing.T) {
 	type testCase struct {
 		a        interface{}
 		b        interface{}

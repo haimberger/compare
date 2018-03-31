@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-func TestBool_Tolerant(t *testing.T) {
+func TestTolerantBasicEqualer_Bool(t *testing.T) {
 	type testCase struct {
 		a        bool
 		b        bool
@@ -25,7 +25,7 @@ func TestBool_Tolerant(t *testing.T) {
 	}
 }
 
-func TestInt_Tolerant(t *testing.T) {
+func TestTolerantBasicEqualer_Int64(t *testing.T) {
 	type testCase struct {
 		a        int64
 		b        int64
@@ -54,7 +54,7 @@ func TestInt_Tolerant(t *testing.T) {
 	}
 }
 
-func TestFloat64_Tolerant(t *testing.T) {
+func TestTolerantBasicEqualer_Float64(t *testing.T) {
 	type testCase struct {
 		a        float64
 		b        float64
@@ -126,7 +126,7 @@ func TestFloat64_Tolerant(t *testing.T) {
 	}
 }
 
-func TestString_Tolerant(t *testing.T) {
+func TestTolerantBasicEqualer_String(t *testing.T) {
 	// if a tolerance is specified, valid dates within the tolerance should be considered equal
 	type testCase struct {
 		a        string
