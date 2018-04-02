@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-func TestJSONEqualer_Equal_exact(t *testing.T) {
+func TestJSONDiffer_Equal_exact(t *testing.T) {
 	type testCase struct {
 		a        string
 		b        string
@@ -67,7 +67,7 @@ func TestJSONEqualer_Equal_exact(t *testing.T) {
 		}
 	}
 }
-func TestJSONEqualer_Equal_tolerant(t *testing.T) {
+func TestJSONDiffer_Equal_tolerant(t *testing.T) {
 	type testCase struct {
 		a        string
 		b        string
