@@ -25,11 +25,11 @@ func (d *JSONDiff) Modified() bool {
 	return len(d.ds) > 0
 }
 
-// String returns a string representation of the differences between two JSON values.
-func (d *JSONDiff) String() (string, error) {
+// Format returns a string representation of the differences between two JSON values.
+func (d *JSONDiff) Format(coloring bool) (string, error) {
 	config := formatter.AsciiFormatterConfig{
 		ShowArrayIndex: true,
-		Coloring:       true,
+		Coloring:       coloring,
 	}
 	formatter := formatter.NewAsciiFormatter(d.left, config)
 	return formatter.Format(d)
