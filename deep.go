@@ -20,27 +20,23 @@ type DeepEqualer struct {
 // 1. Unlike reflect.DeepEqual(), we assume that there are no loops and don't
 // safeguard against them at all.
 //
-// 2. We have no plans to support the comparison of functions.
+// 2. We don't attempt any kind of comparison of functions.
 // Even reflect.DeepEqual() only has minimal support for them, returning true if
 // both functions are nil and false otherwise. We simply return an error.
 //
-// 3. There are some basic types that we don't yet support, but plan to.
-// The basic types that we *do* support are: bool, int, int8, int16, int32,
-// int64, float32, float64, string. Since rune is just an alias of int32, we
-// support it as well. For any other basic types, like unsigned integers and
-// complex numbers, we return an error.
-//
-// 4. Generally speaking, if we come across a type that we don't support, we
+// 3. Generally speaking, if we come across a type that we don't support, we
 // return an error rather than applying some default method of comparison as
 // reflect.DeepEqual() does. This shouldn't be too limiting, however, since we
 // do support the most common types, including arrays, interfaces, maps,
-// pointers, slices, structs, and the basic types listed above.
+// pointers, slices, structs, and all basic types. The only valid "Kinds"
+// (see https://golang.org/pkg/reflect/#Kind) that we don't support are
+// Chan, Func and UnsafePointer.
 func (e DeepEqualer) Equal(a, b interface{}) (bool, error) {
 	return e.equal(reflect.ValueOf(a), reflect.ValueOf(b))
 }
 
 // nolint: gocyclo
-// The complexity is currently 15 (greater than the desired maximum of 10).
+// The complexity is currently 11 (just above the desired maximum of 10).
 // I disabled the gocyclo check, because I can't think of a way to reduce the
 // cyclomatic complexity in a way that really feels like an improvement.
 // In any case, I think that the code is easy to follow as it is, and the test
@@ -57,12 +53,6 @@ func (e DeepEqualer) equal(v1, v2 reflect.Value) (bool, error) {
 	switch v1.Kind() {
 	case reflect.Array:
 		return e.equalArrays(v1, v2)
-	case reflect.Bool:
-		return e.Basic.Bool(v1.Bool(), v2.Bool()), nil
-	case reflect.Float32, reflect.Float64:
-		return e.Basic.Float64(v1.Float(), v2.Float()), nil
-	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-		return e.Basic.Int64(v1.Int(), v2.Int()), nil
 	case reflect.Interface:
 		return e.equalInterfaces(v1, v2)
 	case reflect.Map:
@@ -71,12 +61,10 @@ func (e DeepEqualer) equal(v1, v2 reflect.Value) (bool, error) {
 		return e.equalPointers(v1, v2)
 	case reflect.Slice:
 		return e.equalSlices(v1, v2)
-	case reflect.String:
-		return e.Basic.String(v1.String(), v2.String()), nil
 	case reflect.Struct:
 		return e.equalStructs(v1, v2)
-	default: // unsupported or incomparable type (e.g. Complex128, Func)
-		return false, fmt.Errorf("type %v not supported", v1.Type())
+	default:
+		return e.equalValues(v1, v2)
 	}
 }
 
@@ -150,4 +138,23 @@ func (e DeepEqualer) equalStructs(v1, v2 reflect.Value) (bool, error) {
 		}
 	}
 	return true, nil
+}
+
+func (e DeepEqualer) equalValues(v1, v2 reflect.Value) (bool, error) {
+	switch v1.Kind() {
+	case reflect.Bool:
+		return e.Basic.Bool(v1.Bool(), v2.Bool()), nil
+	case reflect.Complex64, reflect.Complex128:
+		return e.Basic.Complex128(v1.Complex(), v2.Complex()), nil
+	case reflect.Float32, reflect.Float64:
+		return e.Basic.Float64(v1.Float(), v2.Float()), nil
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		return e.Basic.Int64(v1.Int(), v2.Int()), nil
+	case reflect.String:
+		return e.Basic.String(v1.String(), v2.String()), nil
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr:
+		return e.Basic.Uint64(v1.Uint(), v2.Uint()), nil
+	default: // unsupported or incomparable type (e.g. Func)
+		return false, fmt.Errorf("type %v not supported", v1.Type())
+	}
 }

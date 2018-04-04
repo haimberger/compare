@@ -12,8 +12,12 @@ type BasicEqualer interface {
 	Bool(bool, bool) bool
 	// Int64 determines if two integer values are equal.
 	Int64(int64, int64) bool
+	// Uint64 determines if two unsigned integer values are equal.
+	Uint64(uint64, uint64) bool
 	// Float64 determines if two floating-point values are equal.
 	Float64(float64, float64) bool
+	// Complex128 determines if two complex numbers are equal.
+	Complex128(complex128, complex128) bool
 	// String determines if two strings are equal.
 	String(string, string) bool
 	// TODO: add functions for remaining basic types
@@ -73,11 +77,21 @@ func (e TolerantBasicEqualer) Int64(a, b int64) bool {
 	return a == b
 }
 
+// Uint64 compares two integer values exactly.
+func (e TolerantBasicEqualer) Uint64(a, b uint64) bool {
+	return a == b
+}
+
 // Float64 compares two floating-point numbers within a tolerance. For example,
 // if the tolerance is 0.5, then 4.07 and 4.57 are considered equal, but 4.07
 // and 4.571 are not.
 func (e TolerantBasicEqualer) Float64(a, b float64) bool {
 	return math.Abs(a-b) <= e.Float64Tolerance
+}
+
+// Complex128 compares two complex numbers exactly.
+func (e TolerantBasicEqualer) Complex128(a, b complex128) bool {
+	return a == b
 }
 
 // String compares two string values.

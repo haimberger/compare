@@ -62,6 +62,28 @@ func TestTolerantBasicEqualer_Int64(t *testing.T) {
 	}
 }
 
+func TestTolerantBasicEqualer_Uint64(t *testing.T) {
+	type testCase struct {
+		a        uint64
+		b        uint64
+		expected bool
+	}
+	tcs := []testCase{
+		{0, 0, true},
+		{1, 1, true},
+		{0, 1, false},
+		{1, 0, false},
+		{1, 2, false},
+		{2, 1, false},
+	}
+	e := TolerantBasicEqualer{}
+	for _, tc := range tcs {
+		if actual := e.Uint64(tc.a, tc.b); actual != tc.expected {
+			t.Errorf("[%v == %v] expected %v; got %v", tc.a, tc.b, tc.expected, actual)
+		}
+	}
+}
+
 func TestTolerantBasicEqualer_Float64(t *testing.T) {
 	type testCase struct {
 		a        float64
@@ -129,6 +151,37 @@ func TestTolerantBasicEqualer_Float64(t *testing.T) {
 	e = TolerantBasicEqualer{Float64Tolerance: 0.05}
 	for _, tc := range approximate {
 		if actual := e.Float64(tc.a, tc.b); actual != tc.expected {
+			t.Errorf("[%v == %v] expected %v; got %v", tc.a, tc.b, tc.expected, actual)
+		}
+	}
+}
+
+func TestTolerantBasicEqualer_Complex128(t *testing.T) {
+	type testCase struct {
+		a        complex128
+		b        complex128
+		expected bool
+	}
+	tcs := []testCase{
+		{0, 0, true},
+		{1i, 1i, true},
+		{0, 1i, false},
+		{1i, 0, false},
+		{1i, 2i, false},
+		{2i, 1i, false},
+		{0, -1i, false},
+		{-1i, 0, false},
+		{-1i, -1i, true},
+		{-1i, -2i, false},
+		{-2i, -1i, false},
+		{-1i, 1i, false},
+		{1i, -1i, false},
+		{1 + 2i, 2i + 1, true},
+		{1 + 2i, 2 + 2i, false},
+	}
+	e := TolerantBasicEqualer{}
+	for _, tc := range tcs {
+		if actual := e.Complex128(tc.a, tc.b); actual != tc.expected {
 			t.Errorf("[%v == %v] expected %v; got %v", tc.a, tc.b, tc.expected, actual)
 		}
 	}

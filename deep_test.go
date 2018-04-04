@@ -22,6 +22,7 @@ func TestDeepEqualer_Equal_exact(t *testing.T) {
 		expected bool
 		err      string
 	}
+	c := make(chan int)
 	// test cases copied more or less directly from https://golang.org/src/reflect/all_test.go
 	tcs := []testCase{
 		// Equalities
@@ -30,8 +31,11 @@ func TestDeepEqualer_Equal_exact(t *testing.T) {
 		{true, false, false, ""},
 		{1, 1, true, ""},
 		{int32(1), int32(1), true, ""},
+		{uint(1), uint(1), true, ""},
+		{uintptr(1), uintptr(1), true, ""},
 		{0.5, 0.5, true, ""},
 		{float32(0.5), float32(0.5), true, ""},
+		{2i, 2i, true, ""},
 		{"hello", "hello", true, ""},
 		{make([]int, 10), make([]int, 10), true, ""},
 		{&[3]int{1, 2, 3}, &[3]int{1, 2, 3}, true, ""},
@@ -43,8 +47,10 @@ func TestDeepEqualer_Equal_exact(t *testing.T) {
 		// Inequalities
 		{1, 2, false, ""},
 		{int32(1), int32(2), false, ""},
+		{uint(1), uint(2), false, ""},
 		{0.5, 0.6, false, ""},
 		{float32(0.5), float32(0.6), false, ""},
+		{1i, 2i, false, ""},
 		{"hello", "hey", false, ""},
 		{make([]int, 10), make([]int, 11), false, ""},
 		{&[3]int{1, 2, 3}, &[3]int{1, 2, 4}, false, ""},
@@ -86,9 +92,8 @@ func TestDeepEqualer_Equal_exact(t *testing.T) {
 		{map[uint]string{1: "one", 2: "two"}, map[int]string{2: "two", 1: "one"}, false, ""},
 
 		// Unsupported
-		{uint(1), uint(1), false, "type uint not supported"},
-		{2i, 2i, false, "type complex128 not supported"},
 		{func() {}, func() {}, false, "type func() not supported"},
+		{c, c, false, "type chan int not supported"},
 	}
 	// since we specify no tolerances, the equaler will compare values exactly
 	e := DeepEqualer{Basic: TolerantBasicEqualer{}}
