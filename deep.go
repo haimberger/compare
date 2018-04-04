@@ -35,10 +35,6 @@ type DeepEqualer struct {
 // reflect.DeepEqual() does. This shouldn't be too limiting, however, since we
 // do support the most common types, including arrays, interfaces, maps,
 // pointers, slices, structs, and the basic types listed above.
-//
-// 5. For some reason that's not clear to me, our behaviour when comparing
-// values with an empty struct (e.g. `type self struct{}`) is different from the
-// behaviour of reflect.DeepEqual().
 func (e DeepEqualer) Equal(a, b interface{}) (bool, error) {
 	return e.equal(reflect.ValueOf(a), reflect.ValueOf(b))
 }

@@ -13,6 +13,8 @@ type foo struct {
 
 type notFoo foo
 
+type self struct{}
+
 func TestDeepEqualer_Equal_exact(t *testing.T) {
 	type testCase struct {
 		a        interface{}
@@ -57,8 +59,11 @@ func TestDeepEqualer_Equal_exact(t *testing.T) {
 		{[][]int{{1}}, [][]int{{2}}, false, ""},
 		{math.NaN(), math.NaN(), false, ""},
 		{&[1]float64{math.NaN()}, &[1]float64{math.NaN()}, false, ""},
+		{&[1]float64{math.NaN()}, self{}, true, ""},
 		{[]float64{math.NaN()}, []float64{math.NaN()}, false, ""},
+		{[]float64{math.NaN()}, self{}, true, ""},
 		{map[float64]float64{math.NaN(): 1}, map[float64]float64{1: 2}, false, ""},
+		{map[float64]float64{math.NaN(): 1}, self{}, true, ""},
 
 		// Nil vs empty vs zero: not the same.
 		{[]int{}, []int(nil), false, ""},
@@ -84,16 +89,13 @@ func TestDeepEqualer_Equal_exact(t *testing.T) {
 		{uint(1), uint(1), false, "type uint not supported"},
 		{2i, 2i, false, "type complex128 not supported"},
 		{func() {}, func() {}, false, "type func() not supported"},
-
-		// Empty struct (type self struct{})
-		// TODO: figure out why these should be equal (they look unequal to me)
-		//{&[1]float64{math.NaN()}, self{}, true, ""},
-		//{[]float64{math.NaN()}, self{}, true, ""},
-		//{map[float64]float64{math.NaN(): 1}, self{}, true, ""},
 	}
 	// since we specify no tolerances, the equaler will compare values exactly
 	e := DeepEqualer{Basic: TolerantBasicEqualer{}}
 	for _, tc := range tcs {
+		if tc.b == (self{}) {
+			tc.b = tc.a
+		}
 		actual, err := e.Equal(tc.a, tc.b)
 		if err != nil {
 			if tc.err == "" {
