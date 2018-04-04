@@ -31,6 +31,7 @@ func TestJSONDiffer_Equal_exact(t *testing.T) {
 		{`[false, 1, 0.1, "foo"]`, `[false, 1, 0.2, "foo"]`, false, ""},
 		{`[false, 1, 0.1, "foo"]`, `[false, 0.1, 1, "foo"]`, false, ""},
 		{`[false, 1, 0.1]`, `[false, 1, 0.1, "foo"]`, false, ""},
+		{`[false, 1, 0.1, "foo"]`, `[false, 1, 0.1]`, false, ""},
 		{
 			`{"a": false, "b": [1, {"c": 0.1, "d": "foo"}]}`,
 			`{"b": [1, {"d": "foo", "c": 0.1}],"a":false}`,
@@ -40,6 +41,12 @@ func TestJSONDiffer_Equal_exact(t *testing.T) {
 		{
 			`{"b": [1, {"c": 0.1, "d": "foo"}]}`,
 			`{"a": false, "b": [1, {"c": 0.1, "d": "foo"}]}`,
+			false,
+			"",
+		},
+		{
+			`{"a": false, "b": [1, {"c": 0.1, "d": "foo"}]}`,
+			`{"b": [1, {"c": 0.1, "d": "foo"}]}`,
 			false,
 			"",
 		},
@@ -67,6 +74,7 @@ func TestJSONDiffer_Equal_exact(t *testing.T) {
 		}
 	}
 }
+
 func TestJSONDiffer_Equal_tolerant(t *testing.T) {
 	type testCase struct {
 		a        string

@@ -5,6 +5,14 @@ import (
 	"time"
 )
 
+func TestMkSubstringDeleter(t *testing.T) {
+	expectedErr := "error parsing regexp: missing argument to repetition operator: `+`"
+	_, err := MkSubstringDeleter("+")
+	if err == nil || err.Error() != expectedErr {
+		t.Errorf("expected %s; got %v", expectedErr, err)
+	}
+}
+
 func TestTolerantBasicEqualer_Bool(t *testing.T) {
 	type testCase struct {
 		a        bool

@@ -60,13 +60,16 @@ func TestDeepEqualer_Equal_exact(t *testing.T) {
 		{[]float64{math.NaN()}, []float64{math.NaN()}, false, ""},
 		{map[float64]float64{math.NaN(): 1}, map[float64]float64{1: 2}, false, ""},
 
-		// Nil vs empty: not the same.
+		// Nil vs empty vs zero: not the same.
 		{[]int{}, []int(nil), false, ""},
 		{[]int{}, []int{}, true, ""},
 		{[]int(nil), []int(nil), true, ""},
 		{map[int]int{}, map[int]int(nil), false, ""},
 		{map[int]int{}, map[int]int{}, true, ""},
 		{map[int]int(nil), map[int]int(nil), true, ""},
+		{[]interface{}{nil}, []interface{}{nil}, true, ""},
+		{[]interface{}{""}, []interface{}{nil}, false, ""},
+		{[]interface{}{}, []interface{}{nil}, false, ""},
 
 		// Mismatched types
 		{1, 1.0, false, ""},
@@ -105,6 +108,7 @@ func TestDeepEqualer_Equal_exact(t *testing.T) {
 		}
 	}
 }
+
 func TestDeepEqualer_Equal_tolerant(t *testing.T) {
 	type testCase struct {
 		a        interface{}
