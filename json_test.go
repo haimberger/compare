@@ -116,3 +116,58 @@ func TestJSONDiffer_Equal_tolerant(t *testing.T) {
 		}
 	}
 }
+
+func TestJSONDiffer_Compare(t *testing.T) {
+	type testCase struct {
+		a        string
+		b        string
+		expected string
+	}
+	tcs := []testCase{
+		{
+			`{"a": false, "b": [1, {"c": 0.2, "d": "foo"}]}`,
+			`{"a": false, "b": [1.04, {"c": 0.13, "d": "foo"}]}`,
+			` {
+   "$": {
+     "a": false,
+     "b": [
+       0: 1,
+       1: {
+-        "c": 0.2,
++        "c": 0.13,
+         "d": "foo"
+       }
+     ]
+   }
+ }
+`,
+		},
+	}
+	sd, err := MkSubstringDeleter("_[^_]*$") // ignore everything after last underscore
+	if err != nil {
+		t.Fatal(err)
+	}
+	tolerance, err := time.ParseDuration("1s")
+	if err != nil {
+		t.Fatal(err)
+	}
+	e := &JSONDiffer{Basic: TolerantBasicEqualer{
+		Float64Tolerance:  0.05,
+		StringTransformer: sd,
+		TimeLayout:        time.RFC3339Nano,
+		TimeTolerance:     tolerance,
+	}}
+	for _, tc := range tcs {
+		d, err := e.Compare([]byte(tc.a), []byte(tc.b))
+		if err != nil {
+			t.Errorf("[%v == %v] %v", tc.a, tc.b, err)
+			continue
+		}
+		actual, err := d.Format(false)
+		if err != nil {
+			t.Errorf("[%v == %v] %v", tc.a, tc.b, err)
+		} else if actual != tc.expected {
+			t.Errorf("[%v == %v] expected %v; got %v", tc.a, tc.b, tc.expected, actual)
+		}
+	}
+}
