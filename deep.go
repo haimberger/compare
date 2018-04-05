@@ -20,18 +20,17 @@ type DeepEqualer struct {
 // 1. Unlike reflect.DeepEqual(), we assume that there are no loops and don't
 // safeguard against them at all.
 //
-// 2. We don't attempt any kind of comparison of functions.
-// Even reflect.DeepEqual() only has minimal support for them, returning true if
-// both functions are nil and false otherwise. We simply return an error.
-//
-// 3. Generally speaking, if we come across a type that we don't support, we
-// return an error rather than applying some default method of comparison as
-// reflect.DeepEqual() does. This shouldn't be too limiting, however, since we
-// do support the most common types, including arrays, interfaces, maps,
-// pointers, slices, structs, and all basic types. The only valid "Kinds"
-// (see https://golang.org/pkg/reflect/#Kind) that we don't support are
-// Chan, Func and UnsafePointer.
-func (e DeepEqualer) Equal(a, b interface{}) (bool, error) {
+// 2. For types that we don't support directly (i.e. channels, functions and
+// unsafe pointers), we try to fall back to reflect.DeepEqual(). Unfortunately,
+// this approach doesn't work for unexported struct fields, because we can't
+// access the underlying values. In such cases, we return an error.
+func (e DeepEqualer) Equal(a, b interface{}) (same bool, err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			// TODO: only recover from reflect errors?
+			err = fmt.Errorf("%s", r)
+		}
+	}()
 	return e.equal(reflect.ValueOf(a), reflect.ValueOf(b))
 }
 
@@ -154,7 +153,8 @@ func (e DeepEqualer) equalValues(v1, v2 reflect.Value) (bool, error) {
 		return e.Basic.String(v1.String(), v2.String()), nil
 	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr:
 		return e.Basic.Uint64(v1.Uint(), v2.Uint()), nil
-	default: // unsupported or incomparable type (e.g. Func)
-		return false, fmt.Errorf("type %v not supported", v1.Type())
+	default: // Chan, Func, UnsafePointer
+		// panics if a value was obtained by accessing unexported struct fields
+		return reflect.DeepEqual(v1.Interface(), v2.Interface()), nil
 	}
 }

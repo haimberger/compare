@@ -6,24 +6,30 @@ import (
 	"time"
 )
 
-type foo struct {
-	x int
-	y float32
-}
-
-type notFoo foo
-
-type self struct{}
-
 func TestDeepEqualer_Equal_exact(t *testing.T) {
+	// test cases and types copied more or less directly from https://golang.org/src/reflect/all_test.go
 	type testCase struct {
 		a        interface{}
 		b        interface{}
 		expected bool
 		err      string
 	}
-	c := make(chan int)
-	// test cases copied more or less directly from https://golang.org/src/reflect/all_test.go
+
+	type Basic struct {
+		x int
+		y float32
+	}
+	type NotBasic Basic
+	type Unexported struct {
+		x chan int
+	}
+	type self struct{}
+
+	var fn1, fn2 func()     // nil
+	fn3 := func() { fn1() } // not nil
+	ch1 := make(chan int)
+	ch2 := make(chan int)
+
 	tcs := []testCase{
 		// Equalities
 		{nil, nil, true, ""},
@@ -39,10 +45,12 @@ func TestDeepEqualer_Equal_exact(t *testing.T) {
 		{"hello", "hello", true, ""},
 		{make([]int, 10), make([]int, 10), true, ""},
 		{&[3]int{1, 2, 3}, &[3]int{1, 2, 3}, true, ""},
-		{foo{1, 0.5}, foo{1, 0.5}, true, ""},
+		{Basic{1, 0.5}, Basic{1, 0.5}, true, ""},
 		{error(nil), error(nil), true, ""},
 		{map[int]string{1: "one", 2: "two"}, map[int]string{2: "two", 1: "one"}, true, ""},
 		{map[int]*bool{1: nil}, map[int]*bool{1: nil}, true, ""},
+		{ch1, ch1, true, ""},
+		{fn1, fn2, true, ""},
 
 		// Inequalities
 		{1, 2, false, ""},
@@ -54,14 +62,17 @@ func TestDeepEqualer_Equal_exact(t *testing.T) {
 		{"hello", "hey", false, ""},
 		{make([]int, 10), make([]int, 11), false, ""},
 		{&[3]int{1, 2, 3}, &[3]int{1, 2, 4}, false, ""},
-		{foo{1, 0.5}, foo{1, 0.6}, false, ""},
-		{foo{1, 0}, foo{2, 0}, false, ""},
+		{Basic{1, 0.5}, Basic{1, 0.6}, false, ""},
+		{Basic{1, 0}, Basic{2, 0}, false, ""},
 		{map[int]string{1: "one", 3: "two"}, map[int]string{2: "two", 1: "one"}, false, ""},
 		{map[int]string{1: "one", 2: "txo"}, map[int]string{2: "two", 1: "one"}, false, ""},
 		{map[int]string{1: "one"}, map[int]string{2: "two", 1: "one"}, false, ""},
 		{map[int]string{2: "two", 1: "one"}, map[int]string{1: "one"}, false, ""},
 		{nil, 1, false, ""},
 		{1, nil, false, ""},
+		{ch1, ch2, false, ""},
+		{fn1, fn3, false, ""},
+		{fn3, fn3, false, ""},
 		{[][]int{{1}}, [][]int{{2}}, false, ""},
 		{math.NaN(), math.NaN(), false, ""},
 		{&[1]float64{math.NaN()}, &[1]float64{math.NaN()}, false, ""},
@@ -88,12 +99,16 @@ func TestDeepEqualer_Equal_exact(t *testing.T) {
 		{0.5, "hello", false, ""},
 		{[]int{1, 2, 3}, [3]int{1, 2, 3}, false, ""},
 		{&[3]interface{}{1, 2, 4}, &[3]interface{}{1, 2, "s"}, false, ""},
-		{foo{1, 0.5}, notFoo{1, 0.5}, false, ""},
+		{Basic{1, 0.5}, NotBasic{1, 0.5}, false, ""},
 		{map[uint]string{1: "one", 2: "two"}, map[int]string{2: "two", 1: "one"}, false, ""},
 
 		// Unsupported
-		{func() {}, func() {}, false, "type func() not supported"},
-		{c, c, false, "type chan int not supported"},
+		{
+			Unexported{x: ch1},
+			Unexported{x: ch1},
+			false,
+			"reflect.Value.Interface: cannot return value obtained from unexported field or method",
+		},
 	}
 	// since we specify no tolerances, the equaler will compare values exactly
 	e := DeepEqualer{Basic: TolerantBasicEqualer{}}
