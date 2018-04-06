@@ -1,9 +1,37 @@
 package compare
 
 import (
+	"fmt"
 	"testing"
 	"time"
 )
+
+func ExampleJSONDiffer_Compare() {
+	jd := JSONDiffer{Basic: TolerantBasicEqualer{Float64Tolerance: 0.1}}
+	d, err := jd.Compare(
+		[]byte(`{"x": 1.6, "y": [3.8, "hello"]}`),
+		[]byte(`{"x": 1.6, "y": [3.6, "hello"], "z": 0}`))
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	diff, err := d.Format(false) // no colouring
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println(diff)
+	// Output:
+	//  {
+	//    "x": 1.6,
+	//    "y": [
+	// -    0: 3.8,
+	// +    0: 3.6,
+	//      1: "hello"
+	//    ]
+	// +  "z": 0
+	//  }
+}
 
 func TestJSONDiffer_Equal_exact(t *testing.T) {
 	type testCase struct {
@@ -125,20 +153,33 @@ func TestJSONDiffer_Compare(t *testing.T) {
 	}
 	tcs := []testCase{
 		{
+			`"hi"`,
+			`"hello"`,
+			"- \"hi\"\n+ \"hello\"\n",
+		},
+		{
+			`[1, 0.2]`,
+			`[1.04, 0.13]`,
+			` [
+   0: 1,
+-  1: 0.2
++  1: 0.13
+ ]
+`,
+		},
+		{
 			`{"a": false, "b": [1, {"c": 0.2, "d": "foo"}]}`,
 			`{"a": false, "b": [1.04, {"c": 0.13, "d": "foo"}]}`,
 			` {
-   "$": {
-     "a": false,
-     "b": [
-       0: 1,
-       1: {
--        "c": 0.2,
-+        "c": 0.13,
-         "d": "foo"
-       }
-     ]
-   }
+   "a": false,
+   "b": [
+     0: 1,
+     1: {
+-      "c": 0.2,
++      "c": 0.13,
+       "d": "foo"
+     }
+   ]
  }
 `,
 		},

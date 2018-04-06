@@ -3,6 +3,7 @@ package compare
 import (
 	"encoding/json"
 	"reflect"
+	"regexp"
 	"sort"
 
 	"github.com/yudai/gojsondiff"
@@ -32,7 +33,31 @@ func (d *JSONDiff) Format(coloring bool) (string, error) {
 		Coloring:       coloring,
 	}
 	formatter := formatter.NewAsciiFormatter(d.left, config)
-	return formatter.Format(d)
+	diff, err := formatter.Format(d)
+	if err != nil {
+		return "", err
+	}
+
+	// remove wrapping object for values of basic types
+	basicRE, err := regexp.Compile(`^\s*{\n-\s*"\$":\s*([\s\S]*)\+\s*"\$":\s*([\s\S]*)\n\s*}`)
+	if err != nil {
+		return "", err
+	}
+	unwrapped := basicRE.ReplaceAllString(diff, "- $1+ $2")
+
+	// remove wrapping object for arrays and objects
+	nonBasicRE, err := regexp.Compile(`^\s*{\n\s*"\$":([\s\S]*)\n\s}`)
+	if err != nil {
+		return "", err
+	}
+	unwrapped = nonBasicRE.ReplaceAllString(unwrapped, "$1")
+
+	// decrease indentation for remaining lines
+	indentRE, err := regexp.Compile(`(\n.)\s{2}`)
+	if err != nil {
+		return "", err
+	}
+	return indentRE.ReplaceAllString(unwrapped, "$1"), nil
 }
 
 // JSONDiffer compares JSON strings.
