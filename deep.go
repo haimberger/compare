@@ -1,4 +1,17 @@
-// Package compare provides customizable functionality for comparing values.
+/*
+Package compare provides customizable functionality for comparing values.
+
+Whether what you want to compare is something like a struct or map, or a string
+representing a JSON object, the first step is to specify how values of basic
+types like int, float64 and string should be compared. You can accomplish that
+by implementing the BasicEqualer interface yourself or by using the existing
+TolerantBasicEqualer implementation.
+
+Once you have a BasicEqualer, you can use it to create a DeepEqualer
+(to determine whether two values are deeply equal) or a JSONDiffer (to determine
+if two strings represent the same JSON value and to inspect the differences,
+if any).
+*/
 package compare
 
 import (
