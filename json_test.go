@@ -10,7 +10,7 @@ func ExampleJSONDiffer_Compare() {
 	jd := JSONDiffer{Basic: TolerantBasicEqualer{Float64Tolerance: 0.1}}
 	d, err := jd.Compare(
 		[]byte(`{"x": 1.6, "y": [3.8, "hello"]}`),
-		[]byte(`{"x": 1.6, "y": [3.6, "hello"], "z": 0}`))
+		[]byte(`{"x": 1.57, "y": [3.6, "hello"], "z": 0}`))
 	if err != nil {
 		fmt.Println(err)
 		return
