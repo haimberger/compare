@@ -1,10 +1,40 @@
 package compare
 
 import (
+	"fmt"
 	"math"
 	"testing"
 	"time"
 )
+
+func ExampleDeepEqualer_Equal_float() {
+	de := DeepEqualer{Basic: TolerantBasicEqualer{Float64Tolerance: 0.1}}
+	same, err := de.Equal([]float64{1.6, 3.8}, []float64{1.544, 3.89})
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println(same)
+	// Output: true
+}
+
+func ExampleDeepEqualer_Equal_string() {
+	sd, err := MkSubstringDeleter(" .*$") // ignore everything after first space
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	de := DeepEqualer{Basic: TolerantBasicEqualer{StringTransformer: sd}}
+	same, err := de.Equal(
+		map[string]string{"greeting": "Hello Alice!"},
+		map[string]string{"greeting": "Hello Bob!"})
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println(same)
+	// Output: true
+}
 
 func TestDeepEqualer_Equal_exact(t *testing.T) {
 	// test cases and types copied more or less directly from https://golang.org/src/reflect/all_test.go
