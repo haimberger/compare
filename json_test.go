@@ -2,6 +2,7 @@ package compare
 
 import (
 	"fmt"
+	"regexp"
 	"testing"
 	"time"
 )
@@ -121,7 +122,7 @@ func TestJSONDiffer_Equal_tolerant(t *testing.T) {
 			true,
 		},
 	}
-	sd, err := MkSubstringDeleter("_[^_]*$") // ignore everything after last underscore
+	re, err := regexp.Compile("_[^_]*$") // ignore everything after last underscore
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -131,7 +132,7 @@ func TestJSONDiffer_Equal_tolerant(t *testing.T) {
 	}
 	e := &JSONDiffer{Basic: TolerantBasicEqualer{
 		Float64Tolerance:  0.05,
-		StringTransformer: sd,
+		StringTransformer: SubstringDeleter{Regexp: re},
 		TimeLayout:        time.RFC3339Nano,
 		TimeTolerance:     tolerance,
 	}}
@@ -184,7 +185,7 @@ func TestJSONDiffer_Compare(t *testing.T) {
 `,
 		},
 	}
-	sd, err := MkSubstringDeleter("_[^_]*$") // ignore everything after last underscore
+	re, err := regexp.Compile("_[^_]*$") // ignore everything after last underscore
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -194,7 +195,7 @@ func TestJSONDiffer_Compare(t *testing.T) {
 	}
 	e := &JSONDiffer{Basic: TolerantBasicEqualer{
 		Float64Tolerance:  0.05,
-		StringTransformer: sd,
+		StringTransformer: SubstringDeleter{Regexp: re},
 		TimeLayout:        time.RFC3339Nano,
 		TimeTolerance:     tolerance,
 	}}

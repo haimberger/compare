@@ -1,17 +1,10 @@
 package compare
 
 import (
+	"regexp"
 	"testing"
 	"time"
 )
-
-func TestMkSubstringDeleter(t *testing.T) {
-	expectedErr := "error parsing regexp: missing argument to repetition operator: `+`"
-	_, err := MkSubstringDeleter("+")
-	if err == nil || err.Error() != expectedErr {
-		t.Errorf("expected %s; got %v", expectedErr, err)
-	}
-}
 
 func TestTolerantBasicEqualer_Bool(t *testing.T) {
 	type testCase struct {
@@ -228,7 +221,7 @@ func TestTolerantBasicEqualer_String(t *testing.T) {
 		}
 	}
 
-	sd, err := MkSubstringDeleter("_[^_]*$") // ignore everything after last underscore
+	re, err := regexp.Compile("_[^_]*$") // ignore everything after last underscore
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -237,7 +230,7 @@ func TestTolerantBasicEqualer_String(t *testing.T) {
 		t.Fatal(err)
 	}
 	e = TolerantBasicEqualer{
-		StringTransformer: sd,
+		StringTransformer: SubstringDeleter{Regexp: re},
 		TimeLayout:        time.RFC3339Nano,
 		TimeTolerance:     tolerance,
 	}

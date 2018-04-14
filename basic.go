@@ -36,16 +36,6 @@ type SubstringDeleter struct {
 	Regexp *regexp.Regexp
 }
 
-// MkSubstringDeleter creates a new SubstringDeleter based on the specified
-// regular expression.
-func MkSubstringDeleter(expr string) (SubstringDeleter, error) {
-	re, err := regexp.Compile(expr)
-	if err != nil {
-		return SubstringDeleter{}, err
-	}
-	return SubstringDeleter{Regexp: re}, nil
-}
-
 // Transform removes all substrings matching a regular expression.
 func (sd SubstringDeleter) Transform(s string) string {
 	return sd.Regexp.ReplaceAllString(s, "")

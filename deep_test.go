@@ -3,6 +3,7 @@ package compare
 import (
 	"fmt"
 	"math"
+	"regexp"
 	"testing"
 	"time"
 )
@@ -19,12 +20,12 @@ func ExampleDeepEqualer_Equal_float() {
 }
 
 func ExampleDeepEqualer_Equal_string() {
-	sd, err := MkSubstringDeleter(" .*$") // ignore everything after first space
+	re, err := regexp.Compile(" .*$") // ignore everything after first space
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	de := DeepEqualer{Basic: TolerantBasicEqualer{StringTransformer: sd}}
+	de := DeepEqualer{Basic: TolerantBasicEqualer{StringTransformer: SubstringDeleter{Regexp: re}}}
 	same, err := de.Equal(
 		map[string]string{"greeting": "Hello Alice!"},
 		map[string]string{"greeting": "Hello Bob!"})
@@ -184,7 +185,7 @@ func TestDeepEqualer_Equal_tolerant(t *testing.T) {
 			true,
 		},
 	}
-	sd, err := MkSubstringDeleter("_[^_]*$") // ignore everything after last underscore
+	re, err := regexp.Compile("_[^_]*$") // ignore everything after last underscore
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -194,7 +195,7 @@ func TestDeepEqualer_Equal_tolerant(t *testing.T) {
 	}
 	e := DeepEqualer{Basic: TolerantBasicEqualer{
 		Float64Tolerance:  0.05,
-		StringTransformer: sd,
+		StringTransformer: SubstringDeleter{Regexp: re},
 		TimeLayout:        time.RFC3339Nano,
 		TimeTolerance:     tolerance,
 	}}
