@@ -9,7 +9,7 @@ import (
 )
 
 func ExampleDeepEqualer_Equal_float() {
-	de := DeepEqualer{Basic: TolerantBasicEqualer{Float64Tolerance: 0.1}}
+	de := DeepEqualer{TolerantBasicEqualer{Float64Tolerance: 0.1}}
 	same, err := de.Equal([]float64{1.6, 3.8}, []float64{1.544, 3.89})
 	if err != nil {
 		fmt.Println(err)
@@ -25,7 +25,7 @@ func ExampleDeepEqualer_Equal_string() {
 		fmt.Println(err)
 		return
 	}
-	de := DeepEqualer{Basic: TolerantBasicEqualer{StringTransformer: SubstringDeleter{Regexp: re}}}
+	de := DeepEqualer{TolerantBasicEqualer{StringTransformer: SubstringDeleter{Regexp: re}}}
 	same, err := de.Equal(
 		map[string]string{"greeting": "Hello Alice!"},
 		map[string]string{"greeting": "Hello Bob!"})
@@ -142,7 +142,7 @@ func TestDeepEqualer_Equal_exact(t *testing.T) {
 		},
 	}
 	// since we specify no tolerances, the equaler will compare values exactly
-	e := DeepEqualer{Basic: TolerantBasicEqualer{}}
+	e := DeepEqualer{TolerantBasicEqualer{}}
 	for _, tc := range tcs {
 		if tc.b == (self{}) {
 			tc.b = tc.a
@@ -193,7 +193,7 @@ func TestDeepEqualer_Equal_tolerant(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	e := DeepEqualer{Basic: TolerantBasicEqualer{
+	e := DeepEqualer{TolerantBasicEqualer{
 		Float64Tolerance:  0.05,
 		StringTransformer: SubstringDeleter{Regexp: re},
 		TimeLayout:        time.RFC3339Nano,

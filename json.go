@@ -62,8 +62,8 @@ func (d *JSONDiff) Format(coloring bool) (string, error) {
 
 // JSONDiffer compares JSON strings.
 type JSONDiffer struct {
-	// Basic specifies how values of basic types should be compared.
-	Basic BasicEqualer
+	// BasicEqualer specifies how values of basic types should be compared.
+	BasicEqualer
 }
 
 // Equal determines if two JSON strings represent the same value.
@@ -182,11 +182,11 @@ func (jd *JSONDiffer) valueDelta(pos gojsondiff.Position, left, right interface{
 	case nil:
 		same = left == right
 	case bool:
-		same = jd.Basic.Bool(l, right.(bool))
+		same = jd.Bool(l, right.(bool))
 	case float64:
-		same = jd.Basic.Float64(l, right.(float64))
+		same = jd.Float64(l, right.(float64))
 	case string:
-		same = jd.Basic.String(l, right.(string))
+		same = jd.String(l, right.(string))
 	default:
 		// should never happen (https://golang.org/pkg/encoding/json/#Unmarshal)
 		same = reflect.DeepEqual(left, right)

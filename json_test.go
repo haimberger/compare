@@ -8,7 +8,7 @@ import (
 )
 
 func ExampleJSONDiffer_Compare() {
-	jd := JSONDiffer{Basic: TolerantBasicEqualer{Float64Tolerance: 0.1}}
+	jd := JSONDiffer{TolerantBasicEqualer{Float64Tolerance: 0.1}}
 	d, err := jd.Compare(
 		[]byte(`{"x": 1.6, "y": [3.8, "hello"]}`),
 		[]byte(`{"x": 1.57, "y": [3.6, "hello"], "z": 0}`))
@@ -87,7 +87,7 @@ func TestJSONDiffer_Equal_exact(t *testing.T) {
 		},
 	}
 	// since we specify no tolerances, the equaler will compare values exactly
-	e := &JSONDiffer{Basic: TolerantBasicEqualer{}}
+	e := &JSONDiffer{TolerantBasicEqualer{}}
 	for _, tc := range tcs {
 		actual, err := e.Equal([]byte(tc.a), []byte(tc.b))
 		if err != nil {
@@ -130,7 +130,7 @@ func TestJSONDiffer_Equal_tolerant(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	e := &JSONDiffer{Basic: TolerantBasicEqualer{
+	e := &JSONDiffer{TolerantBasicEqualer{
 		Float64Tolerance:  0.05,
 		StringTransformer: SubstringDeleter{Regexp: re},
 		TimeLayout:        time.RFC3339Nano,
@@ -193,7 +193,7 @@ func TestJSONDiffer_Compare(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	e := &JSONDiffer{Basic: TolerantBasicEqualer{
+	e := &JSONDiffer{TolerantBasicEqualer{
 		Float64Tolerance:  0.05,
 		StringTransformer: SubstringDeleter{Regexp: re},
 		TimeLayout:        time.RFC3339Nano,

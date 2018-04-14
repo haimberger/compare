@@ -21,8 +21,8 @@ import (
 
 // DeepEqualer provides functionality for the deep comparison of values.
 type DeepEqualer struct {
-	// Basic specifies how values of basic types should be compared.
-	Basic BasicEqualer
+	// BasicEqualer specifies how values of basic types should be compared.
+	BasicEqualer
 }
 
 // Equal determines if two values contain the same information.
@@ -155,17 +155,17 @@ func (e DeepEqualer) equalStructs(v1, v2 reflect.Value) (bool, error) {
 func (e DeepEqualer) equalValues(v1, v2 reflect.Value) (bool, error) {
 	switch v1.Kind() {
 	case reflect.Bool:
-		return e.Basic.Bool(v1.Bool(), v2.Bool()), nil
+		return e.Bool(v1.Bool(), v2.Bool()), nil
 	case reflect.Complex64, reflect.Complex128:
-		return e.Basic.Complex128(v1.Complex(), v2.Complex()), nil
+		return e.Complex128(v1.Complex(), v2.Complex()), nil
 	case reflect.Float32, reflect.Float64:
-		return e.Basic.Float64(v1.Float(), v2.Float()), nil
+		return e.Float64(v1.Float(), v2.Float()), nil
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-		return e.Basic.Int64(v1.Int(), v2.Int()), nil
+		return e.Int64(v1.Int(), v2.Int()), nil
 	case reflect.String:
-		return e.Basic.String(v1.String(), v2.String()), nil
+		return e.String(v1.String(), v2.String()), nil
 	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr:
-		return e.Basic.Uint64(v1.Uint(), v2.Uint()), nil
+		return e.Uint64(v1.Uint(), v2.Uint()), nil
 	default: // Chan, Func, UnsafePointer
 		// panics if a value was obtained by accessing unexported struct fields
 		return reflect.DeepEqual(v1.Interface(), v2.Interface()), nil
