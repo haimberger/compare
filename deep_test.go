@@ -20,12 +20,10 @@ func ExampleDeepEqualer_Equal_float() {
 }
 
 func ExampleDeepEqualer_Equal_string() {
-	re, err := regexp.Compile(" .*$") // ignore everything after first space
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	de := DeepEqualer{TolerantBasicEqualer{StringTransformer: SubstringDeleter{Regexp: re}}}
+	de := DeepEqualer{TolerantBasicEqualer{
+		// ignore everything after first space
+		StringTransformer: SubstringDeleter{Regexp: regexp.MustCompile(" .*$")},
+	}}
 	same, err := de.Equal(
 		map[string]string{"greeting": "Hello Alice!"},
 		map[string]string{"greeting": "Hello Bob!"})
@@ -185,17 +183,14 @@ func TestDeepEqualer_Equal_tolerant(t *testing.T) {
 			true,
 		},
 	}
-	re, err := regexp.Compile("_[^_]*$") // ignore everything after last underscore
-	if err != nil {
-		t.Fatal(err)
-	}
 	tolerance, err := time.ParseDuration("1s")
 	if err != nil {
 		t.Fatal(err)
 	}
 	e := DeepEqualer{TolerantBasicEqualer{
-		Float64Tolerance:  0.05,
-		StringTransformer: SubstringDeleter{Regexp: re},
+		Float64Tolerance: 0.05,
+		// ignore everything after last underscore
+		StringTransformer: SubstringDeleter{Regexp: regexp.MustCompile("_[^_]*$")},
 		TimeLayout:        time.RFC3339Nano,
 		TimeTolerance:     tolerance,
 	}}

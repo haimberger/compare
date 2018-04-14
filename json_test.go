@@ -122,17 +122,14 @@ func TestJSONDiffer_Equal_tolerant(t *testing.T) {
 			true,
 		},
 	}
-	re, err := regexp.Compile("_[^_]*$") // ignore everything after last underscore
-	if err != nil {
-		t.Fatal(err)
-	}
 	tolerance, err := time.ParseDuration("1s")
 	if err != nil {
 		t.Fatal(err)
 	}
 	e := &JSONDiffer{TolerantBasicEqualer{
-		Float64Tolerance:  0.05,
-		StringTransformer: SubstringDeleter{Regexp: re},
+		Float64Tolerance: 0.05,
+		// ignore everything after last underscore
+		StringTransformer: SubstringDeleter{Regexp: regexp.MustCompile("_[^_]*$")},
 		TimeLayout:        time.RFC3339Nano,
 		TimeTolerance:     tolerance,
 	}}
@@ -185,17 +182,14 @@ func TestJSONDiffer_Compare(t *testing.T) {
 `,
 		},
 	}
-	re, err := regexp.Compile("_[^_]*$") // ignore everything after last underscore
-	if err != nil {
-		t.Fatal(err)
-	}
 	tolerance, err := time.ParseDuration("1s")
 	if err != nil {
 		t.Fatal(err)
 	}
 	e := &JSONDiffer{TolerantBasicEqualer{
-		Float64Tolerance:  0.05,
-		StringTransformer: SubstringDeleter{Regexp: re},
+		Float64Tolerance: 0.05,
+		// ignore everything after last underscore
+		StringTransformer: SubstringDeleter{Regexp: regexp.MustCompile("_[^_]*$")},
 		TimeLayout:        time.RFC3339Nano,
 		TimeTolerance:     tolerance,
 	}}

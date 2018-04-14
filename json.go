@@ -39,24 +39,15 @@ func (d *JSONDiff) Format(coloring bool) (string, error) {
 	}
 
 	// remove wrapping object for values of basic types
-	basicRE, err := regexp.Compile(`^\s*{\n-\s*"\$":\s*([\s\S]*)\+\s*"\$":\s*([\s\S]*)\n\s*}`)
-	if err != nil {
-		return "", err
-	}
+	basicRE := regexp.MustCompile(`^\s*{\n-\s*"\$":\s*([\s\S]*)\+\s*"\$":\s*([\s\S]*)\n\s*}`)
 	unwrapped := basicRE.ReplaceAllString(diff, "- $1+ $2")
 
 	// remove wrapping object for arrays and objects
-	nonBasicRE, err := regexp.Compile(`^\s*{\n\s*"\$":([\s\S]*)\n\s}`)
-	if err != nil {
-		return "", err
-	}
+	nonBasicRE := regexp.MustCompile(`^\s*{\n\s*"\$":([\s\S]*)\n\s}`)
 	unwrapped = nonBasicRE.ReplaceAllString(unwrapped, "$1")
 
 	// decrease indentation for remaining lines
-	indentRE, err := regexp.Compile(`(\n.)\s{2}`)
-	if err != nil {
-		return "", err
-	}
+	indentRE := regexp.MustCompile(`(\n.)\s{2}`)
 	return indentRE.ReplaceAllString(unwrapped, "$1"), nil
 }
 

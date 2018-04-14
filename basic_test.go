@@ -221,16 +221,13 @@ func TestTolerantBasicEqualer_String(t *testing.T) {
 		}
 	}
 
-	re, err := regexp.Compile("_[^_]*$") // ignore everything after last underscore
-	if err != nil {
-		t.Fatal(err)
-	}
 	tolerance, err := time.ParseDuration("1s")
 	if err != nil {
 		t.Fatal(err)
 	}
 	e = TolerantBasicEqualer{
-		StringTransformer: SubstringDeleter{Regexp: re},
+		// ignore everything after last underscore
+		StringTransformer: SubstringDeleter{Regexp: regexp.MustCompile("_[^_]*$")},
 		TimeLayout:        time.RFC3339Nano,
 		TimeTolerance:     tolerance,
 	}
