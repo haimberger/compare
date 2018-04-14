@@ -32,8 +32,8 @@ func (d *JSONDiff) Format(coloring bool) (string, error) {
 		ShowArrayIndex: true,
 		Coloring:       coloring,
 	}
-	formatter := formatter.NewAsciiFormatter(d.left, config)
-	diff, err := formatter.Format(d)
+	af := formatter.NewAsciiFormatter(d.left, config)
+	diff, err := af.Format(d)
 	if err != nil {
 		return "", err
 	}
